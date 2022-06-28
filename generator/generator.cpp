@@ -11,15 +11,17 @@ using namespace omnn::math;
 
 uint64_t N = 0;
 DECL_VA(i);
+DECL_VA(n);
+Valuable::va_names_t Names = {{"i", i}, {"n", n}};
 
 auto BuildFormula() {
-    Valuable::OptimizeOff o;
     std::cout << "For i=[0;" << N << ") enter pattern f(i):" << std::endl;
     std::string s;
     std::cin >> s;
-
-    Valuable pattern(s, i.getVaHost(), true);
-// TODO:   std::cin >> pattern; 
+//    s="i*i*i + -1*i +-1*i";
+    Valuable pattern(s, Names);
+// TODO:   std::cin >> pattern;
+    
     std::cout << std::endl;
     return pattern;
 }
