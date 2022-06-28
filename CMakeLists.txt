@@ -19,7 +19,7 @@ endif()
 include(FetchContent)
 FetchContent_Declare(openmind
     GIT_REPOSITORY https://github.com/ohhmm/openmind.git
-    GIT_TAG Numenta)
+    GIT_TAG generator)
 FetchContent_MakeAvailable(openmind)
 
 # Tell OpenMind to use any boost version installed in the system if any
