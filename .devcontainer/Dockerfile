@@ -49,4 +49,6 @@ RUN emerge \
 RUN emerge -j`nproc` =dev-libs/boost-1.79.0
 RUN sed -i 's/image_read_info< targa_tag >()/image_read_info()/g' /usr/include/boost/gil/extension/io/targa/tags.hpp
 
+RUN echo 'ACCEPT_LICENSE="*"' >> /etc/make.conf
 RUN emerge -j`nproc` dev-util/intel-ocl-sdk
+
