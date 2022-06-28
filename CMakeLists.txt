@@ -3,6 +3,7 @@
 #
 cmake_minimum_required (VERSION 3.8)
 
+option(OPENMIND_DEBUG_CHECKS "Additional debug checks" OFF)
 option(OPENMIND_USE_OPENCL "OpenCL GPU calculations" ON)
 option(OPENMIND_MATH_USE_LEVELDB_CACHE "OpenCL GPU calculations" OFF)
 
