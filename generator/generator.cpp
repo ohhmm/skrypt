@@ -2,12 +2,13 @@
 #include <omnn/math/Variable.h>
 using namespace omnn::math;
 
+#include <boost/archive/binary_oarchive.hpp>
 #include <boost/compute.hpp>
 #include <boost/compute/core.hpp>
 #include <boost/lambda2.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
 #include <boost/program_options.hpp>
-
+#include <boost/serialization/vector.hpp>
 
 uint64_t N = 0;
 DECL_VA(i);
@@ -21,7 +22,7 @@ auto BuildFormula() {
 //    s="i*i*i + -1*i +-1*i";
     Valuable pattern(s, Names);
 // TODO:   std::cin >> pattern;
-    
+    pattern.Eval(n, N);
     std::cout << std::endl;
     return pattern;
 }
@@ -53,6 +54,7 @@ int main()
 {
     std::cout << "N=";
     std::cin >> N;
+//    N=ComputeUnitsWinner.max_work_group_size();
     std::cout << std::endl;
 
     auto y = BuildFormula();
@@ -67,15 +69,15 @@ int main()
 
     auto wgsz = N;
     auto sz = wgsz * sizeof(cl_float);
-    boost::compute::buffer c(context, sz);
-    k.set_arg(0, c);
+    boost::compute::buffer ctx(context, sz);
+    k.set_arg(0, ctx);
 
     // run the add kernel
     queue.enqueue_1d_range_kernel(k, 0, wgsz, 0);
 
     // transfer results to the host array 'c'
     std::vector<float_t> Y(wgsz);
-    queue.enqueue_read_buffer(c, 0, sz, &Y[0]);
+    queue.enqueue_read_buffer(ctx, 0, sz, &Y[0]);
     queue.finish();
 
     std::cout << "Result[" << Y.size() << "]:\n";
@@ -83,5 +85,20 @@ int main()
         std::cout << ' ' << item;
     std::cout << std::endl;
 
-	return 0;
+    std::cout << "Save the data?"  << std::endl;
+    char c;
+    std::cin >> c;
+    if(c == 'y' || c=='Y'){
+        std::cout << "Please, enter filename"  << std::endl;
+        std::string s;
+        std::cin >> s;
+        // serialize vector
+        {
+          std::ofstream ofs(s);
+          boost::archive::binary_oarchive oa(ofs);
+          oa & Y;
+        }
+        std::cout << std::endl;
+    }
+    return 0;
 }
