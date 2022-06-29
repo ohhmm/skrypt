@@ -41,15 +41,15 @@ namespace {
 namespace gen {
 
 	const Valuable::va_names_t& InitialVarNames() {
-		Valuable::va_names_t Names = { {"i", i}, {"n", n} };
-		return names;
+		static Valuable::va_names_t Names = { {"i", i}, {"n", n} };
+		return Names;
 	}
 
 	Valuable BuildFormula(const std::string& s, const Valuable::va_names_t& varNames) {
 		auto names = varNames;
 		names["i"] = i;
-		Valuable pattern(s, varNames);
-		pattern.Eval(n, N);
+        names["n"] = n;
+		Valuable pattern(s, names);
 		return pattern;
 	}
 
@@ -72,7 +72,7 @@ namespace gen {
 		// build OpenCL kernel
 		boost::compute::context context(ComputeUnitsWinner);
 		boost::compute::command_queue queue(context, ComputeUnitsWinner);
-		boost::compute::kernel k(boost::compute::program::build_with_source(openCLcode, context), "f");
+		boost::compute::kernel k(boost::compute::program::build_with_source(pattern.OpenCL(), context), "f");
 
 		auto sz = wgsz * sizeof(cl_float);
 		boost::compute::buffer ctx(context, sz);
@@ -82,8 +82,7 @@ namespace gen {
 		queue.enqueue_1d_range_kernel(k, 0, wgsz, 0);
 
 		// transfer results to the host array 'c'
-		std::vector<float_t> Y(wgsz);
-		queue.enqueue_read_buffer(ctx, 0, sz, &Y[0]);
+		queue.enqueue_read_buffer(ctx, 0, sz, data);
 		queue.finish();
 	}
 
