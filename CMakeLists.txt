@@ -1,6 +1,3 @@
-# CMakeList.txt : Top-level CMake project file, do global configuration
-# and include sub-projects here.
-#
 cmake_minimum_required (VERSION 3.8)
 
 # Select C++ active standard
@@ -10,8 +7,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 option(OPENMIND_DEBUG_CHECKS "Additional debug checks" OFF)
-option(OPENMIND_USE_OPENCL "OpenCL GPU calculations" ON)
-option(OPENMIND_MATH_USE_LEVELDB_CACHE "OpenCL GPU calculations" OFF)
+option(OPENMIND_USE_OPENCL "OpenCL GPU calculations" OFF)
+option(OPENMIND_MATH_USE_LEVELDB_CACHE "OpenCL store DB cache solutions" OFF)
+set(BOOST_ADDITIONAL_COMPONENTS program_options CACHE VERSION "Boost components" FORCE)
+# Tell OpenMind to use any boost version installed in the system if any
+find_package(Boost)
+if(Boost_FOUND)
+    set(OPENMIND_REQUIRED_BOOST_VERSION ${Boost_VERSION} CACHE VERSION "Boost library version to use" FORCE)
+endif()
 
 # Find some Git
 find_package(Git QUIET)
@@ -26,16 +29,8 @@ endif()
 include(FetchContent)
 FetchContent_Declare(openmind
     GIT_REPOSITORY https://github.com/ohhmm/openmind.git
-    GIT_TAG generator)
+    GIT_TAG main)
 FetchContent_MakeAvailable(openmind)
 
-# Tell OpenMind to use any boost version installed in the system if any
-find_package(Boost)
-if(Boost_FOUND)
-    set(OPENMIND_REQUIRED_BOOST_VERSION ${Boost_VERSION} CACHE VERSION "Boost library version to use" FORCE)
-endif()
-
-# Include sub-projects.
-fold(
-	libgen
-	)
+# OpenMind: traverse subprojects
+fold(libskrypt) # parse libskrypt prior to skrypt

@@ -1,2 +1,4 @@
-# generator
-Generator of datasets
+# SKRYPT
+Serg Kryvonos Relation Yarn Plausibility Tool
+
+
