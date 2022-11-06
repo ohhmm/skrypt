@@ -1,14 +1,12 @@
 #include <omnn/math/System.h>
 #include <omnn/math/VarHost.h>
 
-#include <boost/algorithm/string.hpp>
 #include <boost/typeof/typeof.hpp>
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
 
 #include <string_view>
 
-namespace boost::filesystem {
-	class path;
-}
 
 namespace skrypt {
 	class Skrypt
@@ -22,9 +20,17 @@ namespace skrypt {
 
 
 	public:
+		Skrypt() {}
 		Skrypt(const boost::filesystem::path&);
+		Skrypt(std::istream&);
 
 		bool Add(std::string_view);
+
+		/// <summary>
+		/// Loads .skrypt file and returns InitialVarNames for input
+		/// </summary>
+		/// <returns></returns>
+		const omnn::math::Valuable::va_names_t& Load(const boost::filesystem::ifstream&);
 
 		/// <summary>
 		/// Loads .skrypt file and returns InitialVarNames for input

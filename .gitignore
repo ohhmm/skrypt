@@ -34,3 +34,7 @@
 /build*/
 /.vs*/
 /out/
+/.settings
+/.cproject
+/.project
+/CMakeLists.txt.user
