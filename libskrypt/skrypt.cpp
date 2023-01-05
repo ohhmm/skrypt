@@ -23,7 +23,7 @@ bool Skrypt::Add(std::string_view line) {
 	return base::Add(std::move(v));
 }
 
-const omnn::math::Valuable::va_names_t& skrypt::Skrypt::Load(const boost::filesystem::ifstream& in)
+const omnn::math::Valuable::va_names_t& skrypt::Skrypt::Load(boost::filesystem::ifstream& in)
 {
 	std::string line;
 	while (std::getline(in, line)) {

@@ -30,7 +30,7 @@ namespace skrypt {
 		/// Loads .skrypt file and returns InitialVarNames for input
 		/// </summary>
 		/// <returns></returns>
-		const omnn::math::Valuable::va_names_t& Load(const boost::filesystem::ifstream&);
+		const omnn::math::Valuable::va_names_t& Load(boost::filesystem::ifstream&);
 
 		/// <summary>
 		/// Loads .skrypt file and returns InitialVarNames for input

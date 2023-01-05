@@ -12,6 +12,8 @@ using namespace omnn::math;
 #include <boost/filesystem/path.hpp>
 #include <boost/archive/binary_oarchive.hpp>
 
+#include <iostream>
+
 
 namespace {
     boost::program_options::options_description Options("Options");
@@ -29,7 +31,10 @@ int main(int argc, const char* const argv[])
     std::cout << argc << std::endl;
     if (argc > 1)
     {
-        skrypt::Skrypt skrypt(argv[1]);
+        skrypt::Skrypt(argv[1]);
+    }
+    else {
+        skrypt::Skrypt(std::cin);
     }
     return 0;
 }
