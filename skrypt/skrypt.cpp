@@ -31,10 +31,10 @@ int main(int argc, const char* const argv[])
     std::cout << argc << std::endl;
     if (argc > 1)
     {
-        skrypt::Skrypt(argv[1]);
+        skrypt::Skrypt s(argv[1]);
     }
     else {
-        skrypt::Skrypt(std::cin);
+        skrypt::Skrypt s(std::cin);
     }
     return 0;
 }
