@@ -17,7 +17,7 @@ namespace skrypt {
 		BOOST_AUTO(varHost, ::omnn::math::VarHost::make<std::string>());
 
 		omnn::math::Valuable::va_names_t vars;
-
+		bool echo = {};
 
 	public:
 		Skrypt() {}
@@ -37,5 +37,7 @@ namespace skrypt {
 		/// </summary>
 		/// <returns></returns>
 		const omnn::math::Valuable::va_names_t& Load(const boost::filesystem::path&);
+
+		void Echo(bool e) { echo = e; }
 	};
 }
