@@ -20,7 +20,17 @@ using namespace omnn::math;
 bool Skrypt::Add(std::string_view line) {
 	Valuable v(line, varHost);
 	v.CollectVaNames(vars);
-	return base::Add(std::move(v));
+	auto ok = v.IsVa();
+	if (ok) {
+		auto solutions = Solve(v.as<Variable>());
+		for (auto& solution : solutions) {
+			std::cout << ' ' << solution;
+		}
+		std::cout << std::endl;
+	}
+	else
+		ok = base::Add(std::move(v));
+	return ok;
 }
 
 const omnn::math::Valuable::va_names_t& skrypt::Skrypt::Load(std::istream& in)
