@@ -28,8 +28,10 @@ bool Skrypt::Add(std::string_view line) {
 		}
 		std::cout << std::endl;
 	}
-	else
+	else {
+		std::cout << v << std::endl;
 		ok = base::Add(std::move(v));
+	}
 	return ok;
 }
 
@@ -38,7 +40,6 @@ const omnn::math::Valuable::va_names_t& skrypt::Skrypt::Load(std::istream& in)
 	std::string line;
 	while (std::getline(in, line)) {
 		if (!line.empty()) {
-			std::cout << line << std::endl;
 			if (boost::algorithm::contains(line, "?")) {
 				IMPLEMENT
 			}
