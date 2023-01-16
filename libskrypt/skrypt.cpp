@@ -37,12 +37,14 @@ const omnn::math::Valuable::va_names_t& skrypt::Skrypt::Load(std::istream& in)
 {
 	std::string line;
 	while (std::getline(in, line)) {
-		std::cout << line << std::endl;
-		if (boost::algorithm::contains(line, "?")) {
-			IMPLEMENT
-		}
-		else {
-			Add(line);
+		if (!line.empty()) {
+			std::cout << line << std::endl;
+			if (boost::algorithm::contains(line, "?")) {
+				IMPLEMENT
+			}
+			else {
+				Add(line);
+			}
 		}
 	}
 	return vars;
@@ -61,9 +63,6 @@ Skrypt::Skrypt(const boost::filesystem::path & path)
 
 Skrypt::Skrypt(std::istream & stream)
 {
+	MakeTotalEqu(true);
 	Load(stream);
 }
-//
-//Skrypt::Skrypt(std::istream& stdios)
-//{
-//}

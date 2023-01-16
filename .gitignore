@@ -38,3 +38,4 @@
 /.cproject
 /.project
 /CMakeLists.txt.user
+CMakeSettings.json
