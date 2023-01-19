@@ -32,7 +32,6 @@ int main(int argc, const char* const argv[])
     {
         skrypt::Skrypt s;
         s.Echo(true);
-        s.MakeTotalEqu(true);
         s.Load(argv[1]);
     }
     else {
