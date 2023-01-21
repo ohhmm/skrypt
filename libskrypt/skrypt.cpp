@@ -35,13 +35,24 @@ bool Skrypt::Add(std::string_view line) {
 	return ok;
 }
 
+namespace {
+	std::string Questionless(std::string s) {
+		s.erase(std::remove(s.begin(), s.end(), '?'), s.end());
+		return s;
+	}
+}
 const omnn::math::Valuable::va_names_t& skrypt::Skrypt::Load(std::istream& in)
 {
 	std::string line;
 	while (std::getline(in, line)) {
 		if (!line.empty()) {
 			if (boost::algorithm::contains(line, "?")) {
-				IMPLEMENT
+				auto& total = Total();
+				auto questionless = Questionless(line);
+				Valuable v(questionless, varHost);
+				auto rest = total / v;
+				std::cout << "Total: " << total << std::endl
+					<< "Total / " << v << ": " << rest << std::endl;
 			}
 			else {
 				Add(line);
