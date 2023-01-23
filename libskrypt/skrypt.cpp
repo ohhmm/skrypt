@@ -47,12 +47,39 @@ const omnn::math::Valuable::va_names_t& skrypt::Skrypt::Load(std::istream& in)
 	while (std::getline(in, line)) {
 		if (!line.empty()) {
 			if (boost::algorithm::contains(line, "?")) {
+				auto yes = false;
 				auto& total = Total();
 				auto questionless = Questionless(line);
 				Valuable v(questionless, varHost);
-				auto rest = total / v;
-				std::cout << "Total: " << total << std::endl
-					<< "Total / " << v << ": " << rest << std::endl;
+				auto lineVars = v.Vars();
+				if (total.IsSum()) {
+					auto rest = total / v;
+					std::cout << "Total: " << total << std::endl
+						<< total << " / " << v << ": " << rest << std::endl;
+					auto& totalSum = total.as<Sum>();
+					if (lineVars.size() == 1) {
+						std::vector<Valuable> coefficients;
+						auto& va = *lineVars.begin();
+						auto totalGrade = totalSum.FillPolyCoeff(coefficients, va);
+						coefficients.clear();
+						if (v.IsSum()) {
+							auto& lineSum = v.as<Sum>();
+							auto lineGrade = lineSum.FillPolyCoeff(coefficients, va);
+							if (rest.IsSum()) {
+								auto restGrade = rest.as<Sum>().FillPolyCoeff(coefficients, va);
+								yes = totalGrade == restGrade + lineGrade;
+							}
+						}
+					}
+					else {
+						IMPLEMENT
+					}
+				}
+				else {
+					IMPLEMENT
+				}
+				
+				std::cout << (yes ? "YES" : "IDK") << std::endl;
 			}
 			else {
 				Add(line);
