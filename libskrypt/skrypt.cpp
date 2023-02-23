@@ -46,6 +46,19 @@ const omnn::math::Valuable::va_names_t& skrypt::Skrypt::Load(std::istream& in)
 	std::string line;
 	while (std::getline(in, line)) {
 		if (!line.empty()) {
+#ifdef SKRYPT_EQUAL_SIGN
+			if (boost::algorithm::contains(line, "=")) {
+				if (boost::algorithm::contains(line, "==")) {
+					boost::replace_first(_2, "==", "-");
+				}
+				else {
+					boost::replace_first(_2, "=", "-");
+				}
+				if (boost::algorithm::contains(line, "=")) {
+					LOG_AND_IMPLEMENT("More than one '=' sign");
+				}
+			}
+#endif
 			if (boost::algorithm::contains(line, "?")) {
 				auto yes = false;
 				auto& total = Total();
@@ -68,6 +81,12 @@ const omnn::math::Valuable::va_names_t& skrypt::Skrypt::Load(std::istream& in)
 							if (rest.IsSum()) {
 								auto restGrade = rest.as<Sum>().FillPolyCoeff(coefficients, va);
 								yes = totalGrade == restGrade + lineGrade;
+							}
+						}
+						else if (v.IsVa()) {
+							auto solutions = Solve(v.as<Variable>());
+							if (solutions.size() == 1) {
+								yes = solutions.cbegin()->operator==(0);
 							}
 						}
 					}

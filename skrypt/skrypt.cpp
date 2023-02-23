@@ -28,10 +28,16 @@ int main(int argc, const char* const argv[])
 {
     boost::program_options::basic_command_line_parser<char> parser(argc, argv);
 
+	std::cout << "SKRYPT RULEZ:\n"
+		"Accepts three forms of input :\n"
+		"- expressions with variables(automatically equal to zero)\n"
+		"- single variable name(to show its value if known)\n"
+		"- expression with question mark to check if its true\n";
     if (argc > 1)
     {
         skrypt::Skrypt s;
         s.Echo(true);
+		s.MakeTotalEqu(true);
         s.Load(argv[1]);
     }
     else {
