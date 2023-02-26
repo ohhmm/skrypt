@@ -20,18 +20,28 @@ using namespace omnn::math;
 bool Skrypt::Add(std::string_view line) {
 	Valuable v(line, varHost);
 	v.CollectVaNames(vars);
-	auto ok = v.IsVa();
-	if (ok) {
-		auto solutions = Solve(v.as<Variable>());
-		for (auto& solution : solutions) {
-			std::cout << ' ' << solution;
-		}
-		std::cout << std::endl;
-	}
-	else {
-		std::cout << v << std::endl;
-		ok = base::Add(std::move(v));
-	}
+    bool ok = {};
+    try
+    {
+        if (v.IsVa()) {
+            auto solutions = Solve(v.as<Variable>());
+            for (auto& solution : solutions) {
+                std::cout << ' ' << solution;
+            }
+            std::cout << std::endl;
+            ok = true;
+        }
+        else {
+            std::cout << v << std::endl;
+            ok = base::Add(std::move(v));
+        }
+    }
+    catch(...)
+    {
+        if (!ok) {
+            std::cout << "Please, consider improving the system to make this request" << std::endl;
+        }
+    }
 	return ok;
 }
 
