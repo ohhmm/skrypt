@@ -30,8 +30,8 @@ int main(int argc, const char* const argv[])
 
 	std::cout << "SKRYPT RULEZ:\n"
 		"Accepts three forms of input :\n"
-		"- expressions with variables(automatically equal to zero)\n"
-		"- single variable name(to show its value if known)\n"
+		"- equations with any variables are automatically equaled to zero\n"
+		"- single variable name to show its value if known\n"
 		"- expression with question mark to check if its true\n";
     if (argc > 1)
     {

@@ -108,7 +108,10 @@ const omnn::math::Valuable::va_names_t& skrypt::Skrypt::Load(std::istream& in)
 					IMPLEMENT
 				}
 				
-				std::cout << (yes ? "YES" : "IDK") << std::endl;
+				std::cout << '\n'
+					<< v << " ?\n"
+					<< (yes ? "YES\n" : "IDK\n")
+					<< std::endl;
 			}
 			else {
 				Add(line);
@@ -120,6 +123,7 @@ const omnn::math::Valuable::va_names_t& skrypt::Skrypt::Load(std::istream& in)
 
 const omnn::math::Valuable::va_names_t& skrypt::Skrypt::Load(const boost::filesystem::path & path)
 {
+	std::cout << "Loading " << path << '\n' << std::endl;
 	boost::filesystem::ifstream stream(path);
 	return Load(stream);
 }

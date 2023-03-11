@@ -35,6 +35,7 @@
 /.vs*/
 /out/
 /.settings
+/.cache/
 /.cproject
 /.project
 /CMakeLists.txt.user
