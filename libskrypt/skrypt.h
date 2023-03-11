@@ -24,6 +24,8 @@ namespace skrypt {
 		Skrypt(const boost::filesystem::path&);
 		Skrypt(std::istream&);
 
+		using base::Add;
+		
 		bool Add(std::string_view);
 
 		/// <summary>
