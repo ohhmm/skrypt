@@ -14,7 +14,7 @@ set(BOOST_ADDITIONAL_COMPONENTS program_options CACHE VERSION "Boost components"
 # Tell OpenMind to use any boost version installed in the system if any
 find_package(Boost)
 if(Boost_FOUND)
-    set(OPENMIND_REQUIRED_BOOST_VERSION ${Boost_VERSION} CACHE VERSION "Boost library version to use" FORCE)
+    set(OPENMIND_REQUIRED_BOOST_VERSION ${Boost_VERSION_STRING} CACHE VERSION "Boost library version to use" FORCE)
 endif()
 
 # Find some Git

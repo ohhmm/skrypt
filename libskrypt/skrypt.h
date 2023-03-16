@@ -19,6 +19,9 @@ namespace skrypt {
 		omnn::math::Valuable::va_names_t vars;
 		bool echo = {};
 
+	protected:
+		auto GetVarHost() const { return varHost; }
+
 	public:
 		Skrypt() {}
 		Skrypt(const boost::filesystem::path&);
