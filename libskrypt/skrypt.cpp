@@ -1,4 +1,5 @@
 
+#include "Valuable.h"
 #include <skrypt.h>
 
 #include <boost/algorithm/string.hpp>
@@ -16,6 +17,16 @@
 using namespace skrypt;
 using namespace omnn::math;
 
+
+void Skrypt::SetVarhost(decltype(varHost) host)
+{
+	auto allocatedVarsCount = varHost->Stored();
+	if(allocatedVarsCount != 0) {
+		LOG_AND_IMPLEMENT("VarHost has " << allocatedVarsCount << " vars allocated. Consider moving thouse to the new host. The base system needs the support.")
+	}else{
+		varHost = host;
+	}
+}
 
 bool Skrypt::Add(std::string_view line) {
 	Valuable v(line, varHost);

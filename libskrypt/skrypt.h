@@ -20,6 +20,7 @@ namespace skrypt {
 		bool echo = {};
 
 	protected:
+		void SetVarhost(decltype(varHost));
 		auto GetVarHost() const { return varHost; }
 
 	public:
