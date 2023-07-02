@@ -35,6 +35,7 @@ bool Skrypt::Add(std::string_view line) {
     try
     {
         if (v.IsVa()) {
+			std::cout << v << " =";
             auto solutions = Solve(v.as<Variable>());
             for (auto& solution : solutions) {
                 std::cout << ' ' << solution;
@@ -50,7 +51,7 @@ bool Skrypt::Add(std::string_view line) {
     catch(...)
     {
         if (!ok) {
-            std::cout << "Please, consider improving the system to make this request" << std::endl;
+            std::cout << "Please, consider additional defining to the system to make this request" << std::endl;
         }
     }
 	return ok;

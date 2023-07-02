@@ -1,0 +1,12 @@
+
+TimeWithNoFlowKm-1.4
+TimeWithTheFlowKm-1.7
+
+ShipVelocityKmph-28
+
+DistanceMadeWithTheFlowKm-(DistanceMadeAgainstTheFlowKm-2.2)
+
+TimeWithTheFlowKm*(ShipVelocityKmph+Flow)-DistanceMadeWithTheFlowKm
+TimeWithNoFlowKm*(ShipVelocityKmph-Flow)-DistanceMadeAgainstTheFlowKm
+
+Flow

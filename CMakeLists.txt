@@ -12,7 +12,6 @@ option(OPENMIND_USE_TESTS "Tests" OFF)
 option(OPENMIND_MATH_USE_LEVELDB_CACHE "DB cache solutions" ON)
 set(BOOST_ADDITIONAL_COMPONENTS program_options CACHE VERSION "Boost components" FORCE)
 # Tell OpenMind to use any boost version installed in the system if any
-find_package(Boost)
 if(Boost_FOUND)
     set(OPENMIND_REQUIRED_BOOST_VERSION ${Boost_VERSION_STRING} CACHE VERSION "Boost library version to use" FORCE)
 endif()
