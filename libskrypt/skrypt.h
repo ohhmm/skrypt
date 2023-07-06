@@ -1,3 +1,4 @@
+#pragma once
 #include <omnn/math/System.h>
 #include <omnn/math/VarHost.h>
 
@@ -24,6 +25,8 @@ namespace skrypt {
 		auto GetVarHost() const { return varHost; }
 
 	public:
+		using value_type = omnn::math::Valuable;
+
 		Skrypt() {}
 		Skrypt(const boost::filesystem::path&);
 		Skrypt(std::istream&);

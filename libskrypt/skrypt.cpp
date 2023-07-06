@@ -147,6 +147,6 @@ Skrypt::Skrypt(const boost::filesystem::path & path)
 
 Skrypt::Skrypt(std::istream & stream)
 {
-	MakeTotalEqu(true);
+	MakesTotalEqu(true);
 	Load(stream);
 }
