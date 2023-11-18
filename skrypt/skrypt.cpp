@@ -37,8 +37,9 @@ int main(int argc, const char* const argv[])
     {
         skrypt::Skrypt s;
         s.Echo(true);
-		s.MakeTotalEqu(true);
+		s.MakesTotalEqu(true);
         s.Load(argv[1]);
+        s.Load(std::cin);
     }
     else {
         skrypt::Skrypt s(std::cin);
