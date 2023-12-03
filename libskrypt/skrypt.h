@@ -39,8 +39,9 @@ namespace skrypt {
 		using base::Add;
 		
 		bool Add(std::string_view);
-		bool ParseNextLine(std::istream&, std::string_view&);
+        bool ParseNextLine(std::istream&, std::string_view&);
 		void PrintVarKnowns(const omnn::math::Variable&);
+        void ProcessQuestionLine(std::string_view&);
 
 		/// <summary>
 		/// Loads .skrypt file and returns InitialVarNames for input

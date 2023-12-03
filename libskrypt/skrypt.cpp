@@ -76,22 +76,86 @@ namespace {
 		return line.find_first_of("{}[]"sv);
 	}
 }
+
+void Skrypt::ProcessQuestionLine(std::string_view& line)
+{
+	auto yes = false;
+	auto& total = Total();
+	auto questionless = Questionless(line);
+	if (questionless.empty()) {
+		for (auto& [name, var] : vars) {
+			PrintVarKnowns(var);
+		}
+	}
+	else {
+		Valuable v(questionless, varHost);
+		auto lineVars = v.Vars();
+		if (total.IsSum()) {
+			auto rest = total / v;
+			std::cout << "Total: " << total << std::endl
+				<< total << " / " << v << ": " << rest << std::endl;
+			auto& totalSum = total.as<Sum>();
+			if (lineVars.size() == 1) {
+				std::vector<Valuable> coefficients;
+				auto& va = *lineVars.begin();
+				auto totalGrade = totalSum.FillPolyCoeff(coefficients, va);
+				coefficients.clear();
+				if (v.IsSum()) {
+					auto& lineSum = v.as<Sum>();
+					auto lineGrade = lineSum.FillPolyCoeff(coefficients, va);
+					if (rest.IsSum()) {
+						auto restGrade = rest.as<Sum>().FillPolyCoeff(coefficients, va);
+						yes = totalGrade == restGrade + lineGrade;
+					}
+				}
+				else if (v.IsVa()) {
+					auto solutions = Solve(v.as<Variable>());
+					if (solutions.size() == 1) {
+						yes = solutions.cbegin()->operator==(0);
+					}
+				}
+			}
+			else {
+				IMPLEMENT
+			}
+		}
+		else if (total == constants::zero) {
+
+		}
+		else {
+			IMPLEMENT
+		}
+
+		std::cout << '\n'
+			<< v << " ?\n"
+			<< (yes ? "YES\n" : "IDK\n")
+			<< std::endl;
+	}
+}
+
 bool Skrypt::ParseNextLine(std::istream& in, std::string_view& line) {
 	if (!line.empty()) {
 		auto bracePos = FindBracePos(line);
 		auto brace = bracePos == std::string_view::npos ? 0 : line[bracePos];
-		line.remove_prefix(bracePos);
+		line.remove_prefix(bracePos+1);
 		switch (brace)
 		{
 		case '{': {
-			if (disjunctionParseMode || Expressions().empty()) {
+			if (disjunctionParseMode) {
 				Skrypt subsrypt;
+				subsrypt.MakesTotalEqu(MakesTotalEqu());
 				auto parsingIsOnTheGo = subsrypt.ParseNextLine(in, line);
 				if (parsingIsOnTheGo)
 					subsrypt.Load(in);
 				if(!subsrypt.IsEmpty())
 					Add(subsrypt.Total());
 				return parsingIsOnTheGo;
+			}
+			else if (Expressions().empty()) {
+				if (line.empty())
+					return true;
+				else
+					break;
 			}
 			else {
 				LOG_AND_IMPLEMENT("No need for double conjunction");
@@ -104,9 +168,16 @@ bool Skrypt::ParseNextLine(std::istream& in, std::string_view& line) {
 			return {};
 		}
 		case '[': {
+			if (disjunctionParseMode) {
+				LOG_AND_IMPLEMENT("No need for double disjunction");
+			}
 			LOG_AND_IMPLEMENT("Implement OR system");
+			break;
 		}
 		case ']': {
+			if (!disjunctionParseMode) {
+				LOG_AND_IMPLEMENT("Closing conjunction with disjunction brace");
+			}
 			return {};
 		}
 		case 0: {
@@ -130,61 +201,12 @@ bool Skrypt::ParseNextLine(std::istream& in, std::string_view& line) {
 		}
 #endif
 		if (boost::algorithm::contains(line, "?")) {
-			auto yes = false;
-			auto& total = Total();
-			auto questionless = Questionless(line);
-			if (questionless.empty()) {
-				for (auto& [name, var] : vars) {
-					PrintVarKnowns(var);
-				}
-				return true;
-			}
-			Valuable v(questionless, varHost);
-			auto lineVars = v.Vars();
-			if (total.IsSum()) {
-				auto rest = total / v;
-				std::cout << "Total: " << total << std::endl
-					<< total << " / " << v << ": " << rest << std::endl;
-				auto& totalSum = total.as<Sum>();
-				if (lineVars.size() == 1) {
-					std::vector<Valuable> coefficients;
-					auto& va = *lineVars.begin();
-					auto totalGrade = totalSum.FillPolyCoeff(coefficients, va);
-					coefficients.clear();
-					if (v.IsSum()) {
-						auto& lineSum = v.as<Sum>();
-						auto lineGrade = lineSum.FillPolyCoeff(coefficients, va);
-						if (rest.IsSum()) {
-							auto restGrade = rest.as<Sum>().FillPolyCoeff(coefficients, va);
-							yes = totalGrade == restGrade + lineGrade;
-						}
-					}
-					else if (v.IsVa()) {
-						auto solutions = Solve(v.as<Variable>());
-						if (solutions.size() == 1) {
-							yes = solutions.cbegin()->operator==(0);
-						}
-					}
-				}
-				else {
-					IMPLEMENT
-				}
-			}
-			else if (total == constants::zero) {
-
-			}
-			else {
-				IMPLEMENT
-			}
-
-			std::cout << '\n'
-				<< v << " ?\n"
-				<< (yes ? "YES\n" : "IDK\n")
-				<< std::endl;
+			ProcessQuestionLine(line);
 		}
 		else {
 			Add(line);
 		}
+		line = {};
 	}
 	return true;
 }
