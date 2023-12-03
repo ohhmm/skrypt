@@ -19,9 +19,14 @@ namespace skrypt {
 
 		omnn::math::Valuable::va_names_t vars;
 		bool echo = {};
+		bool disjunctionParseMode = {};
 
 	protected:
 		void SetVarhost(decltype(varHost));
+		constexpr bool DisjunctionParseMode() const { return disjunctionParseMode; }
+		void DisjunctionParseMode(bool isDisjunctionMode) {
+			disjunctionParseMode = isDisjunctionMode;
+		}
 		auto GetVarHost() const { return varHost; }
 
 	public:
@@ -34,7 +39,7 @@ namespace skrypt {
 		using base::Add;
 		
 		bool Add(std::string_view);
-
+		bool ParseNextLine(std::istream&, std::string_view&);
 		void PrintVarKnowns(const omnn::math::Variable&);
 
 		/// <summary>

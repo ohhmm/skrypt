@@ -13,20 +13,28 @@ using namespace omnn::math;
 #include <boost/archive/binary_oarchive.hpp>
 
 #include <iostream>
+#include <vector>
 
 
 namespace {
+	bool IsInteractiveMode = true;
     boost::program_options::options_description Options("Options");
-    boost::filesystem::path filepath;
+    std::vector<boost::filesystem::path> filepath;
     auto& desc = Options.add_options()
 		("help", "produce help message")
 		("file", boost::program_options::value(&filepath), "Load task description")
+		("i,interactive", boost::program_options::value(&IsInteractiveMode)->default_value(true), "Continue interactive mode after loading scripts")
 		;
     boost::program_options::variables_map vm;
 }
 int main(int argc, const char* const argv[])
 {
-    boost::program_options::basic_command_line_parser<char> parser(argc, argv);
+	boost::program_options::store(boost::program_options::parse_command_line(argc, argv, Options), vm);
+	boost::program_options::notify(vm);
+	if (vm.count("help")) {
+		std::cout << "Usage: options_description [options]\n" << Options;
+		exit(0);
+	}
 
 	std::cout << "SKRYPT RULEZ:\n"
 		"Accepts three forms of input :\n"
@@ -38,8 +46,10 @@ int main(int argc, const char* const argv[])
         skrypt::Skrypt s;
         s.Echo(true);
 		s.MakesTotalEqu(true);
-        s.Load(argv[1]);
-        s.Load(std::cin);
+		for(auto& file : filepath)
+			s.Load(file);
+		if(IsInteractiveMode)
+			s.Load(std::cin);
     }
     else {
         skrypt::Skrypt s(std::cin);
