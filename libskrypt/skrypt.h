@@ -15,7 +15,7 @@ namespace skrypt {
 	{
 		using base = omnn::math::System;
 
-		BOOST_AUTO(varHost, ::omnn::math::VarHost::make<std::string>());
+		::omnn::math::VarHost::ptr varHost = ::omnn::math::VarHost::make<std::string>();
 
 		omnn::math::Valuable::va_names_t vars;
 		bool echo = {};
@@ -34,6 +34,8 @@ namespace skrypt {
 		using base::Add;
 		
 		bool Add(std::string_view);
+
+		void PrintVarKnowns(const omnn::math::Variable&);
 
 		/// <summary>
 		/// Loads .skrypt file and returns InitialVarNames for input

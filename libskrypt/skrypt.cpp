@@ -28,6 +28,16 @@ void Skrypt::SetVarhost(decltype(varHost) host)
 	}
 }
 
+void Skrypt::PrintVarKnowns(const Variable& v)
+{
+	std::cout << v << " =";
+	auto solutions = Solve(v);
+	for (auto& solution : solutions) {
+		std::cout << ' ' << solution;
+	}
+	std::cout << std::endl;
+}
+
 bool Skrypt::Add(std::string_view line) {
 	Valuable v(line, varHost);
 	v.CollectVaNames(vars);
@@ -35,12 +45,7 @@ bool Skrypt::Add(std::string_view line) {
     try
     {
         if (v.IsVa()) {
-			std::cout << v << " =";
-            auto solutions = Solve(v.as<Variable>());
-            for (auto& solution : solutions) {
-                std::cout << ' ' << solution;
-            }
-            std::cout << std::endl;
+			PrintVarKnowns(v.as<Variable>());
             ok = true;
         }
         else {
@@ -63,7 +68,7 @@ namespace {
 		return s;
 	}
 }
-const omnn::math::Valuable::va_names_t& skrypt::Skrypt::Load(std::istream& in)
+const omnn::math::Valuable::va_names_t& Skrypt::Load(std::istream& in)
 {
 	std::string line;
 	while (std::getline(in, line)) {
@@ -85,6 +90,12 @@ const omnn::math::Valuable::va_names_t& skrypt::Skrypt::Load(std::istream& in)
 				auto yes = false;
 				auto& total = Total();
 				auto questionless = Questionless(line);
+				if (questionless.empty()) {
+					for (auto& [name, var] : vars) {
+						PrintVarKnowns(var);
+					}
+					continue;
+				}
 				Valuable v(questionless, varHost);
 				auto lineVars = v.Vars();
 				if (total.IsSum()) {
@@ -116,7 +127,9 @@ const omnn::math::Valuable::va_names_t& skrypt::Skrypt::Load(std::istream& in)
 						IMPLEMENT
 					}
 				}
-				else {
+				else if(total == constants::zero) {
+
+				} else {
 					IMPLEMENT
 				}
 				
@@ -133,7 +146,7 @@ const omnn::math::Valuable::va_names_t& skrypt::Skrypt::Load(std::istream& in)
 	return vars;
 }
 
-const omnn::math::Valuable::va_names_t& skrypt::Skrypt::Load(const boost::filesystem::path & path)
+const omnn::math::Valuable::va_names_t& Skrypt::Load(const boost::filesystem::path & path)
 {
 	std::cout << "Loading " << path << '\n' << std::endl;
 	boost::filesystem::ifstream stream(path);

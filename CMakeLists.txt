@@ -25,6 +25,8 @@ if(NOT GIT_EXECUTABLE)
     find_package(Git)
 endif()
 
+find_package(Threads)
+
 # Fetch some OpenMind
 include(FetchContent)
 FetchContent_Declare(openmind
