@@ -24,9 +24,9 @@ namespace skrypt {
 	protected:
 		void SetVarhost(decltype(varHost));
 		constexpr bool DisjunctionParseMode() const { return disjunctionParseMode; }
-		void DisjunctionParseMode(bool isDisjunctionMode) {
-			disjunctionParseMode = isDisjunctionMode;
-		}
+		void DisjunctionParseMode(bool isDisjunctionMode) { disjunctionParseMode = isDisjunctionMode; }
+		::omnn::math::Product disjunction;
+		bool ParseTotal(std::istream&, std::string_view&, std::function<void(::omnn::math::Valuable&&)>);
 		auto GetVarHost() const { return varHost; }
 
 	public:

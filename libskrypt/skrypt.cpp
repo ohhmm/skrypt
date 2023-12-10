@@ -30,6 +30,21 @@ void Skrypt::SetVarhost(decltype(varHost) host)
 	}
 }
 
+bool skrypt::Skrypt::ParseTotal(std::istream& in, std::string_view& line, std::function<void(::omnn::math::Valuable&&)> result)
+{
+	MakesTotalEqu(true);
+	auto parsingIsOnTheGo = ParseNextLine(in, line);
+	if (parsingIsOnTheGo)
+		Load(in);
+	if (DisjunctionParseMode())
+		result(std::move(disjunction));
+	else if (!Expressions().empty()) {
+		auto& total = const_cast<::omnn::math::Valuable&>(Total());
+		result(std::move(total));
+	}
+	return parsingIsOnTheGo;
+}
+
 void Skrypt::PrintVarKnowns(const Variable& v)
 {
 	std::cout << v << " =";
@@ -52,7 +67,10 @@ bool Skrypt::Add(std::string_view line) {
         }
         else {
             std::cout << v << std::endl;
-            ok = base::Add(std::move(v));
+			if(DisjunctionParseMode())
+				ok = disjunction.Add(v) != disjunction.end();
+			else
+				ok = base::Add(std::move(v));
         }
     }
     catch(...)
@@ -142,14 +160,13 @@ bool Skrypt::ParseNextLine(std::istream& in, std::string_view& line) {
 		{
 		case '{': {
 			if (disjunctionParseMode) {
-				Skrypt subsrypt;
-				subsrypt.MakesTotalEqu(MakesTotalEqu());
-				auto parsingIsOnTheGo = subsrypt.ParseNextLine(in, line);
-				if (parsingIsOnTheGo)
-					subsrypt.Load(in);
-				if(!subsrypt.IsEmpty())
-					Add(subsrypt.Total());
-				return parsingIsOnTheGo;
+				Skrypt subscript;
+				subscript.SetVarhost(GetVarHost());
+				subscript.Echo(echo);
+				return subscript.ParseTotal(in, line,
+					[this](::omnn::math::Valuable&& result) {
+						Add(std::move(result));
+					});
 			}
 			else if (Expressions().empty()) {
 				if (line.empty())
@@ -171,11 +188,19 @@ bool Skrypt::ParseNextLine(std::istream& in, std::string_view& line) {
 			if (disjunctionParseMode) {
 				LOG_AND_IMPLEMENT("No need for double disjunction");
 			}
-			LOG_AND_IMPLEMENT("Implement OR system");
-			break;
+			Skrypt subscript;
+			subscript.SetVarhost(GetVarHost());
+			subscript.Echo(echo);
+			subscript.DisjunctionParseMode(true);
+			return subscript.ParseTotal(in, line,
+				[this](::omnn::math::Valuable&& result) {
+					Add(std::move(result));
+				});
 		}
 		case ']': {
-			if (!disjunctionParseMode) {
+			if (DisjunctionParseMode()) {
+				Add(std::move(disjunction));
+			}else {
 				LOG_AND_IMPLEMENT("Closing conjunction with disjunction brace");
 			}
 			return {};
