@@ -1,6 +1,8 @@
 # SKRYPT
 Serg Kryvonos Relation Yarn Plausibility Tool
 
+This is the software designed to hold the whole of ergo.
+
 Accepts three forms of input:
 
     - expressions with variables (automatically equal to zero)
