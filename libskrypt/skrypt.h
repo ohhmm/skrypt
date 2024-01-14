@@ -27,7 +27,6 @@ namespace skrypt {
 		void DisjunctionParseMode(bool isDisjunctionMode) { disjunctionParseMode = isDisjunctionMode; }
 		::omnn::math::Product disjunction;
 		bool ParseTotal(std::istream&, std::string_view&, std::function<void(::omnn::math::Valuable&&)>);
-		auto GetVarHost() const { return varHost; }
 
 	public:
 		using value_type = omnn::math::Valuable;
@@ -35,6 +34,8 @@ namespace skrypt {
 		Skrypt() {}
 		Skrypt(const boost::filesystem::path&);
 		Skrypt(std::istream&);
+
+		auto GetVarHost() const { return varHost; }
 
 		using base::Add;
 		
