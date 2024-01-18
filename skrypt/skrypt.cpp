@@ -45,7 +45,7 @@ int main(int argc, const char* const argv[])
     {
         skrypt::Skrypt s;
         s.Echo(true);
-		s.MakesTotalEqu(true);
+		//s.MakesTotalEqu(true);
 		if (filepath.size() == 0 && argc == 2) {
 			filepath.push_back(argv[1]);
 		}
