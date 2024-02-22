@@ -8,26 +8,29 @@ on:
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
-  BUILD_TYPE: Debug
+  BUILD_TYPE: Release
 
 jobs:
   build:
-    # The CMake configure and build commands are platform agnostic and should work equally well on Windows or Mac.
-    # You can convert this to a matrix build if you need cross-platform coverage.
-    # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
     runs-on: ubuntu-latest
-    container:
-        image: ohhmm/openmind:latest
 
     steps:
     - uses: actions/checkout@v3
 
+    - name: OS prerequisites
+      run: sudo add-apt-repository -y ppa:mhier/libboost-latest && sudo apt update && sudo apt upgrade -y && sudo apt install -y libboost1.83-all-dev libxss-dev libx11-dev libxcb-screensaver0-dev ocl-icd-opencl-dev libopengl-dev freeglut3-dev libleveldb-dev libsnappy-dev libvulkan-dev liblz4-dev libfmt-dev librocksdb-dev libpython3-all-dev libopencl-clang-dev libtbb-dev ninja-build
+
+    - name: Create Build Dir
+      run: cmake -E make_directory ${{github.workspace}}/build
+
     - name: Configure CMake
-      run: cmake -B ${{github.workspace}}/build -G "Ninja Multi-Config" -DOPENMIND_BUILD_TESTS=ON
+      working-directory: ${{github.workspace}}/build
+      run: cmake ${{github.workspace}} -DOPENMIND_BUILD_SAMPLES=OFF -DOPENMIND_BUILD_TESTS=ON -DOPENMIND_USE_OPENCL=OFF -G "Ninja Multi-Config"
 
     - name: Build
+      working-directory: ${{github.workspace}}/build
       run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
-    - name: Test
+    - name: Check
       working-directory: ${{github.workspace}}/build
       run: ctest . -j`nproc` -C ${{env.BUILD_TYPE}} -R skrypt --rerun-failed --output-on-failure
