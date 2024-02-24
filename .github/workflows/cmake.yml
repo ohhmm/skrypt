@@ -2,9 +2,9 @@ name: CMake
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "develop" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "develop" ]
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
@@ -33,4 +33,4 @@ jobs:
 
     - name: Check
       working-directory: ${{github.workspace}}/build
-      run: ctest . -j`nproc` -C ${{env.BUILD_TYPE}} -R skrypt --rerun-failed --output-on-failure
+      run: ctest . -j`nproc` -C ${{env.BUILD_TYPE}} --test-dir libskrypt --rerun-failed --output-on-failure
