@@ -108,7 +108,13 @@ void Skrypt::ProcessQuestionLine(std::string_view& line)
 	else {
 		Valuable v(questionless, varHost);
 		auto lineVars = v.Vars();
-		if (total.IsSum()) {
+        if (v.IsInt()) {
+            if (v == 0) {
+                is = Valuable::YesNoMaybe::Yes;
+            } else {
+                is = Valuable::YesNoMaybe::No;
+            }
+        } else if (total.IsSum()) {
 			auto rest = total / v;
 			std::cout << "Total: " << total << std::endl
 				<< total << " / " << v << ": " << rest << std::endl;
@@ -138,9 +144,7 @@ void Skrypt::ProcessQuestionLine(std::string_view& line)
 			else {
 				IMPLEMENT
 			}
-		}
-		else if (total == constants::zero) {
-            is = Valuable::YesNoMaybe::Yes;
+		} else if (total == constants::zero) {
         } else if (total.IsInt()) {
             is = Valuable::YesNoMaybe::No;
         }
