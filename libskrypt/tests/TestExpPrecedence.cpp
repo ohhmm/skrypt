@@ -39,3 +39,10 @@ BOOST_AUTO_TEST_CASE(skryptExpOrdertest
     }
     BOOST_TEST(solutionsWithExpNoBrackets == solutions);
 }
+
+BOOST_AUTO_TEST_CASE(TestEqualityPrecedence
+    , *boost::unit_test::disabled()
+) {
+    Skrypt skryptWithBrackets;
+    skryptWithBrackets.Load(TEST_SRC_DIR "TestEqualityPrecedence.skrypt");
+}
