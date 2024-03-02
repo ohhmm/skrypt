@@ -220,19 +220,7 @@ bool Skrypt::ParseNextLine(std::istream& in, std::string_view& line) {
 			IMPLEMENT;
 		}
 		}
-#ifdef SKRYPT_EQUAL_SIGN
-		if (boost::algorithm::contains(line, "=")) {
-			if (boost::algorithm::contains(line, "==")) {
-				boost::replace_first(_2, "==", "-");
-			}
-			else {
-				boost::replace_first(_2, "=", "-");
-			}
-			if (boost::algorithm::contains(line, "=")) {
-				LOG_AND_IMPLEMENT("More than one '=' sign");
-			}
-		}
-#endif
+
 		if (boost::algorithm::contains(line, "?")) {
 			ProcessQuestionLine(line);
 		}
