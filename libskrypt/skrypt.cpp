@@ -97,7 +97,7 @@ namespace {
 
 void Skrypt::ProcessQuestionLine(std::string_view& line)
 {
-	auto yes = false;
+    Valuable::YesNoMaybe is = Valuable::YesNoMaybe::Maybe;
 	auto& total = Total();
 	auto questionless = Questionless(line);
 	if (questionless.empty()) {
@@ -123,13 +123,15 @@ void Skrypt::ProcessQuestionLine(std::string_view& line)
 					auto lineGrade = lineSum.FillPolyCoeff(coefficients, va);
 					if (rest.IsSum()) {
 						auto restGrade = rest.as<Sum>().FillPolyCoeff(coefficients, va);
-						yes = totalGrade == restGrade + lineGrade;
+                        if (totalGrade == restGrade + lineGrade)
+							is = Valuable::YesNoMaybe::Yes;
 					}
 				}
 				else if (v.IsVa()) {
 					auto solutions = Solve(v.as<Variable>());
 					if (solutions.size() == 1) {
-						yes = solutions.cbegin()->operator==(0);
+						if(solutions.cbegin()->operator==(0))
+							is = Valuable::YesNoMaybe::Yes;
 					}
 				}
 			}
@@ -138,16 +140,22 @@ void Skrypt::ProcessQuestionLine(std::string_view& line)
 			}
 		}
 		else if (total == constants::zero) {
-
-		}
+            is = Valuable::YesNoMaybe::Yes;
+        } else if (total.IsInt()) {
+            is = Valuable::YesNoMaybe::No;
+        }
 		else {
 			IMPLEMENT
 		}
 
-		std::cout << '\n'
-			<< v << " ?\n"
-			<< (yes ? "YES\n" : "IDK\n")
-			<< std::endl;
+		std::cout << '\n' << v << " ?\n";
+        if (is == Valuable::YesNoMaybe::Yes)
+            std::cout << "YES";
+        else if (is == Valuable::YesNoMaybe::No)
+            std::cout << "NO";
+        else
+            std::cout << "IDK";
+        std::cout << std::endl;
 	}
 }
 
