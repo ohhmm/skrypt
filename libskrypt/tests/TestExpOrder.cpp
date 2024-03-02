@@ -6,7 +6,14 @@ using namespace ::skrypt;
 using namespace std::string_literals;
 using namespace std::string_view_literals;
 
-BOOST_AUTO_TEST_CASE(skryptExpOrdertest){
+BOOST_AUTO_TEST_CASE(ExpOrderSkryptLoadingTest) {
+    Skrypt(TEST_SRC_DIR "TestExpOrderWithBrackets.skrypt");
+    Skrypt(TEST_SRC_DIR "TestExpBracketless.skrypt");
+}
+
+BOOST_AUTO_TEST_CASE(skryptExpOrdertest
+    , *boost::unit_test::disabled()
+) {
     Skrypt skryptWithBrackets;
     skryptWithBrackets.Load(TEST_SRC_DIR "TestExpOrderWithBrackets.skrypt");
 

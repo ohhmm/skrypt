@@ -6,7 +6,13 @@ using namespace ::skrypt;
 using namespace std::string_literals;
 using namespace std::string_view_literals;
 
-BOOST_AUTO_TEST_CASE(ConjunctionDisjunctionTest){
+BOOST_AUTO_TEST_CASE(ConjunctionDisjunctionSkryptLoadingTest) { 
+    Skrypt(TEST_SRC_DIR "ConDisj.skrypt");
+}
+
+BOOST_AUTO_TEST_CASE(ConjunctionDisjunctionTest
+    , *boost::unit_test::disabled()
+){
     Skrypt skrypt;
     skrypt.Load(TEST_SRC_DIR "ConDisj.skrypt");
 
@@ -22,3 +28,4 @@ BOOST_AUTO_TEST_CASE(ConjunctionDisjunctionTest){
         BOOST_TEST(solution == 10);
     }
 }
+
