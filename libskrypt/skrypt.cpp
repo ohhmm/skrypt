@@ -106,26 +106,35 @@ void Skrypt::ProcessQuestionLine(std::string_view& line)
 		}
 	}
 	else {
-		Valuable v(questionless, varHost);
-		auto lineVars = v.Vars();
-        if (v.IsInt()) {
-            if (v == 0) {
+		Valuable expression(questionless, varHost);
+		auto lineVars = expression.Vars();
+        Valuable::vars_cont_t knowns;
+		for (auto& v : lineVars) {
+            auto& known = Known(v);
+			if (known.size() == 1) {
+                knowns.emplace(v, *known.begin());
+			}
+		}
+		if (knowns.size())
+			expression.eval(knowns);
+        if (expression.IsInt()) {
+            if (expression == 0) {
                 is = Valuable::YesNoMaybe::Yes;
             } else {
                 is = Valuable::YesNoMaybe::No;
             }
         } else if (total.IsSum()) {
-			auto rest = total / v;
+			auto rest = total / expression;
 			std::cout << "Total: " << total << std::endl
-				<< total << " / " << v << ": " << rest << std::endl;
+				<< total << " / " << expression << ": " << rest << std::endl;
 			auto& totalSum = total.as<Sum>();
 			if (lineVars.size() == 1) {
 				std::vector<Valuable> coefficients;
 				auto& va = *lineVars.begin();
 				auto totalGrade = totalSum.FillPolyCoeff(coefficients, va);
 				coefficients.clear();
-				if (v.IsSum()) {
-					auto& lineSum = v.as<Sum>();
+				if (expression.IsSum()) {
+					auto& lineSum = expression.as<Sum>();
 					auto lineGrade = lineSum.FillPolyCoeff(coefficients, va);
 					if (rest.IsSum()) {
 						auto restGrade = rest.as<Sum>().FillPolyCoeff(coefficients, va);
@@ -133,8 +142,8 @@ void Skrypt::ProcessQuestionLine(std::string_view& line)
 							is = Valuable::YesNoMaybe::Yes;
 					}
 				}
-				else if (v.IsVa()) {
-					auto solutions = Solve(v.as<Variable>());
+				else if (expression.IsVa()) {
+					auto solutions = Solve(expression.as<Variable>());
 					if (solutions.size() == 1) {
 						if(solutions.cbegin()->operator==(0))
 							is = Valuable::YesNoMaybe::Yes;
@@ -152,7 +161,7 @@ void Skrypt::ProcessQuestionLine(std::string_view& line)
 			IMPLEMENT
 		}
 
-		std::cout << '\n' << v << " ?\n";
+		std::cout << '\n' << expression << " ?\n";
         if (is == Valuable::YesNoMaybe::Yes)
             std::cout << "YES";
         else if (is == Valuable::YesNoMaybe::No)
