@@ -57,6 +57,7 @@ void Skrypt::PrintVarKnowns(const Variable& v)
 
 bool Skrypt::Add(std::string_view line) {
 	Valuable v(line, varHost);
+    BackgroudLoadingModules(v);
 	v.CollectVaNames(vars);
     bool ok = {};
     try
@@ -98,12 +99,12 @@ namespace {
 void Skrypt::ProcessQuestionLine(std::string_view& line)
 {
     Valuable::YesNoMaybe is = Valuable::YesNoMaybe::Maybe;
-	auto questionless = Questionless(line);
-	if (questionless.empty()) {
-		for (auto& [name, var] : vars) {
-			PrintVarKnowns(var);
-		}
-	}
+    auto questionless = Questionless(line);
+    if (questionless.empty()) {
+        for (auto& [name, var] : vars) {
+            PrintVarKnowns(var);
+        }
+    }
 	else {
 		Valuable expression(questionless, varHost);
 		auto lineVars = expression.Vars();
@@ -123,7 +124,7 @@ void Skrypt::ProcessQuestionLine(std::string_view& line)
                 is = Valuable::YesNoMaybe::No;
             }
         } else try {
-            auto total = MakeTotalEqu() ? Total() : CalculateTotalExpression();
+            const auto total = MakesTotalEqu() ? Total().Link() : CalculateTotalExpression();
             if (total.IsSum()) {
                 auto rest = total / expression;
                 std::cout << "Total: " << total << std::endl
@@ -280,4 +281,65 @@ Skrypt::Skrypt(std::istream & stream)
 {
 	MakesTotalEqu(true);
 	Load(stream);
+}
+
+boost::filesystem::path Skrypt::FindModulePath(std::string_view name) const {
+    boost::filesystem::path path(std::string(name) + ".skrypt");
+    if (!boost::filesystem::exists(path)) {
+        std::cerr << "Module " << path << " not found" << std::endl;
+    }
+    return path;
+}
+
+Skrypt::module_t Skrypt::Module(std::string_view fileName) {
+    auto it = modules.find(fileName);
+    if (it == modules.end()) {
+        auto skrypt = std::make_shared<Skrypt>();
+        skrypt->Echo({}); // Silence!
+		skrypt->Load(FindModulePath(fileName));
+        std::unique_lock lock(modulesLoadingMutex);
+        auto module = modules.emplace(fileName, std::move(skrypt));
+        return module.first->second;
+    } else {
+        return it->second;
+    }
+}
+
+Skrypt::loading_module_t Skrypt::StartLoadingModule(std::string_view name) {
+    return std::async(std::launch::async, &Skrypt::Module, this, name);
+}
+
+Skrypt::loading_modules_t Skrypt::LoadModules(const ::omnn::math::Valuable& v) {
+    loading_modules_t loadingModules;
+    for (auto& [name, var] : v.VaNames()) {
+        auto dot = name.find('.');
+        if (dot != std::string::npos) {
+            auto moduleName = name.substr(0, dot);
+            auto loading = loadingModules.find(std::string(moduleName));
+            if (loading == loadingModules.end()) {
+                // not loading yet
+                {
+                    std::shared_lock lock(modulesLoadingMutex);
+                    auto loaded = modules.find(moduleName);
+                    if (loaded != modules.end()) {
+                        // already loaded
+                        std::promise<module_t> promise;
+                        promise.set_value(loaded->second);
+                        loadingModules.emplace(moduleName, promise.get_future());
+                        continue;
+                    }
+                }
+                loadingModules.emplace(moduleName, StartLoadingModule(moduleName));
+            }
+        }
+    }
+    return loadingModules;
+}
+
+Skrypt::loading_modules_future_t Skrypt::StartLoadingModules(const Valuable& v) {
+    return std::async(std::launch::async, &Skrypt::LoadModules, this, v);
+}
+
+void Skrypt::BackgroudLoadingModules(const ::omnn::math::Valuable& v) {
+    modulesLoadingQueue.AddTask(&Skrypt::LoadModules, this, v);
 }
