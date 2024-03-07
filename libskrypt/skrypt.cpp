@@ -115,13 +115,35 @@ void Skrypt::ProcessQuestionLine(std::string_view& line)
                 knowns.emplace(v, *known.begin());
 			}
 		}
-		if (knowns.size())
-			expression.eval(knowns);
-        if (expression.IsInt()) {
-            if (expression == 0) {
+
+        if (expression.IsSimple() == constants::zero) {
+            if (expression == constants::zero)
                 is = Valuable::YesNoMaybe::Yes;
+            else if (expression.Distinct().contains(constants::zero)) {
+                std::cout << "potentially ";
+                is = Valuable::YesNoMaybe::Yes;
+            }
+			else {
+				is = Valuable::YesNoMaybe::No;
+			}
+        } else if (knowns.size()) {
+			expression.eval(knowns);
+            expression.optimize();
+            if (expression.IsInt()) {
+                if (expression == 0) {
+                    is = Valuable::YesNoMaybe::Yes;
+                } else {
+                    is = Valuable::YesNoMaybe::No;
+                }
+            } else if (expression.IsSimple()) {
+                if (expression.Distinct().contains(constants::zero)) {
+                    std::cout << "not neccessarily, but ";
+                    is = Valuable::YesNoMaybe::Yes;
+                } else {
+                    is = Valuable::YesNoMaybe::No;
+                }
             } else {
-                is = Valuable::YesNoMaybe::No;
+                IMPLEMENT
             }
         } else try {
             const auto total = MakesTotalEqu() ? Total().Link() : CalculateTotalExpression();
