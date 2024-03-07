@@ -34,6 +34,7 @@ class Skrypt
     modules_t modules;
     std::shared_mutex modulesLoadingMutex;
     ::omnn::rt::StoringTasksQueue<loading_modules_t> modulesLoadingQueue;
+    ::boost::filesystem::path sourceFilePath;
 
 protected:
     void SetVarhost(decltype(varHost));

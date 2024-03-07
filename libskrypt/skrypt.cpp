@@ -274,6 +274,7 @@ const omnn::math::Valuable::va_names_t& Skrypt::Load(const boost::filesystem::pa
 
 Skrypt::Skrypt(const boost::filesystem::path & path)
 {
+	sourceFilePath = path;
 	Load(path);
 }
 
@@ -284,9 +285,11 @@ Skrypt::Skrypt(std::istream & stream)
 }
 
 boost::filesystem::path Skrypt::FindModulePath(std::string_view name) const {
-    boost::filesystem::path path(std::string(name) + ".skrypt");
+	auto path = sourceFilePath.parent_path() / name;
+    if (!path.has_extension())
+        path.replace_extension(".skrypt");
     if (!boost::filesystem::exists(path)) {
-        std::cerr << "Module " << path << " not found" << std::endl;
+        path = path.filename();
     }
     return path;
 }
