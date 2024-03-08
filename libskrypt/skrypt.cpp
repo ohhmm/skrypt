@@ -316,18 +316,34 @@ boost::filesystem::path Skrypt::FindModulePath(std::string_view name) const {
     return path;
 }
 
+Skrypt::module_t Skrypt::GetLoadedModule(std::string_view fileName) const {
+    module_t loaded;
+	std::shared_lock lock(modulesMapMutex);
+	auto it = modules.find(fileName);
+	if (it != modules.end()) {
+		loaded = it->second;
+	}
+	return loaded;
+}
+
+bool Skrypt::IsModuleLoading(std::string_view name) const {
+	IMPLEMENT
+
+}
+
 Skrypt::module_t Skrypt::Module(std::string_view fileName) {
-    auto it = modules.find(fileName);
-    if (it == modules.end()) {
+    auto loaded = GetLoadedModule(fileName);
+	// TODO : check if the module is being loaded
+	// if (IsModuleLoading(fileName)) { }
+    if (!loaded) {
         auto skrypt = std::make_shared<Skrypt>();
         skrypt->Echo({}); // Silence!
 		skrypt->Load(FindModulePath(fileName));
-        std::unique_lock lock(modulesLoadingMutex);
+        std::unique_lock lock(modulesMapMutex);
         auto module = modules.emplace(fileName, std::move(skrypt));
-        return module.first->second;
-    } else {
-        return it->second;
+        loaded = module.first->second;
     }
+	return loaded;
 }
 
 Skrypt::loading_module_t Skrypt::StartLoadingModule(std::string_view name) {
@@ -344,7 +360,7 @@ Skrypt::loading_modules_t Skrypt::LoadModules(const ::omnn::math::Valuable& v) {
             if (loading == loadingModules.end()) {
                 // not loading yet
                 {
-                    std::shared_lock lock(modulesLoadingMutex);
+                    std::shared_lock lock(modulesMapMutex);
                     auto loaded = modules.find(moduleName);
                     if (loaded != modules.end()) {
                         // already loaded
@@ -367,4 +383,46 @@ Skrypt::loading_modules_future_t Skrypt::StartLoadingModules(const Valuable& v) 
 
 void Skrypt::BackgroudLoadingModules(const ::omnn::math::Valuable& v) {
     modulesLoadingQueue.AddTask(&Skrypt::LoadModules, this, v);
+}
+
+std::string_view Skrypt::GetVariableName(const ::omnn::math::Variable& v) const {
+	auto host = v.getVaHost();
+	auto name = host->GetName(v.getId());
+	return name;
+}
+
+std::string_view Skrypt::GetModuleName(std::string_view name) const {
+    auto dot = name.find('.');
+    if (dot == std::string::npos) {
+        name = {};
+    } else {
+        name.remove_suffix(name.size() - dot);
+    }
+    return name;
+}
+
+std::string_view Skrypt::GetModuleName(const ::omnn::math::Variable& v) const {
+    auto name = GetVariableName(v);
+    return GetModuleName(name);
+}
+
+const ::omnn::math::Valuable::solutions_t& Skrypt::Known(const ::omnn::math::Variable& v)
+{
+	auto known = base::Known(v);
+    if (known.size() == 0) {
+        auto name = GetVariableName(v);
+		auto moduleName = GetModuleName(name);
+		auto module = Module(GetModuleName(name));
+        name.remove_prefix(
+			moduleName.size()
+			+ 1 // '.'
+			);
+		auto& moduleVarNames = module->GetVarNames();
+        auto moduleVarIt = moduleVarNames.find(name);
+		if (moduleVarIt != moduleVarNames.end()) {
+			auto& moduleVar = moduleVarIt->second;
+            known = module->Known(moduleVar);
+		}
+	}
+    return known;
 }

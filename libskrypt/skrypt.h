@@ -32,7 +32,8 @@ class Skrypt
     using loading_modules_future_t = std::future<loading_modules_t>;
 
     modules_t modules;
-    std::shared_mutex modulesLoadingMutex;
+    mutable std::shared_mutex modulesMapMutex;
+    mutable std::shared_mutex modulesLoadingMutex;
     ::omnn::rt::StoringTasksQueue<loading_modules_t> modulesLoadingQueue;
     ::boost::filesystem::path sourceFilePath;
 
@@ -78,14 +79,19 @@ public:
     /// <returns>Skrypt&</returns>
     /// <param name="fileName">The module name.</param>
     module_t Module(std::string_view fileName);
+    module_t GetLoadedModule(std::string_view fileName) const;
 
     boost::filesystem::path FindModulePath(std::string_view name) const;
-
+    bool IsModuleLoading(std::string_view name) const;
     loading_module_t StartLoadingModule(std::string_view name);
     loading_modules_t LoadModules(const ::omnn::math::Valuable& v);
     loading_modules_future_t StartLoadingModules(const ::omnn::math::Valuable& v);
 
     void BackgroudLoadingModules(const ::omnn::math::Valuable& v);
+    std::string_view GetVariableName(const ::omnn::math::Variable&) const;
+    std::string_view GetModuleName(std::string_view variableName) const;
+    std::string_view GetModuleName(const ::omnn::math::Variable&) const;
+    const solutions_t& Known(const ::omnn::math::Variable& v);
 
     void Echo(bool e) { echo = e; }
 };

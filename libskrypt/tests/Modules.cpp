@@ -17,12 +17,12 @@ BOOST_AUTO_TEST_CASE(ModulePropertyTest) {
     // get the variable
     auto variableName = "x"s;
     auto varhost = skrypt.GetVarHost();
-    auto& pendingTheVariable = varhost->Host(variableName);
+    auto& variable = varhost->Host(variableName);
     auto& moduleVariableX = varhost->Host("TestExpOrderWithBrackets.x"s);
 
     // check that the variable is already solved
     auto moduleVariableSolutions = skrypt.Known(moduleVariableX);
-    skrypt.Known(pendingTheVariable);
+    skrypt.Known(variable);
     BOOST_TEST(moduleVariableSolutions.size() == 1);
     for (auto& solution : moduleVariableSolutions) {
         BOOST_TEST(solution == 1);
