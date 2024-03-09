@@ -28,12 +28,13 @@ class Skrypt
     using module_t = std::shared_ptr<Skrypt>;
     using modules_t = std::map<std::string_view, module_t>;
     using loading_module_t = std::future<module_t>;
-    using loading_modules_t = std::map<std::string, loading_module_t>;
+    using loading_modules_t = std::map<std::string_view, loading_module_t>;
     using loading_modules_future_t = std::future<loading_modules_t>;
 
     modules_t modules;
     mutable std::shared_mutex modulesMapMutex;
     mutable std::shared_mutex modulesLoadingMutex;
+    modules_t modulesLoading;
     ::omnn::rt::StoringTasksQueue<loading_modules_t> modulesLoadingQueue;
     ::boost::filesystem::path sourceFilePath;
 
@@ -77,8 +78,9 @@ public:
     /// Loads or gets loaded .skrypt file and returns Skrypt object reference
     /// </summary>
     /// <returns>Skrypt&</returns>
-    /// <param name="fileName">The module name.</param>
-    module_t Module(std::string_view fileName);
+    /// <param name="name">The module name</param>
+    module_t Module(std::string_view name);
+    module_t Module(const ::omnn::math::Variable&);
     module_t GetLoadedModule(std::string_view fileName) const;
 
     boost::filesystem::path FindModulePath(std::string_view name) const;
@@ -92,6 +94,7 @@ public:
     std::string_view GetModuleName(std::string_view variableName) const;
     std::string_view GetModuleName(const ::omnn::math::Variable&) const;
     const solutions_t& Known(const ::omnn::math::Variable& v);
+    const ::omnn::math::Variable& MappedModuleVariable(const ::omnn::math::Variable&, module_t module = {});
 
     void Echo(bool e) { echo = e; }
 };

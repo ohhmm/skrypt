@@ -45,8 +45,52 @@ bool skrypt::Skrypt::ParseTotal(std::istream& in, std::string_view& line, std::f
 	return parsingIsOnTheGo;
 }
 
+const ::omnn::math::Variable& Skrypt::MappedModuleVariable(const ::omnn::math::Variable& v, module_t module) {
+    auto name = GetVariableName(v);
+    auto moduleName = GetModuleName(name);
+    if (!moduleName.empty()) {
+        name.remove_prefix(moduleName.size() + 1 // '.'
+        );
+        if (!module) {
+            module = Module(moduleName);
+        }
+        auto& moduleVarNames = module->GetVarNames();
+        auto moduleVarIt = moduleVarNames.find(name);
+        if (moduleVarIt != moduleVarNames.end()) {
+            return moduleVarIt->second;
+        } else {
+            std::shared_lock lock(modulesLoadingMutex);
+            auto loading = modulesLoading.find(moduleName);
+            auto isModuleLoading = loading != modulesLoading.end();
+            if (isModuleLoading) {
+                auto loadingModule = loading->second;
+                if (module != loadingModule) {
+                    LOG_AND_IMPLEMENT(
+                        "Either variable of different module or resolve race condition in module loading");
+                } else {
+                    auto moduleVarIt = module->GetVarNames().find(name);
+                    if (moduleVarIt != module->GetVarNames().end()) {
+                        return moduleVarIt->second;
+                    } else {
+                        LOG_AND_IMPLEMENT("Variable not found in the module");
+                    }
+                }
+            } else {
+                LOG_AND_IMPLEMENT("Module not found");
+            }
+        }
+    }
+    return v; // this module variable
+}
+
 void Skrypt::PrintVarKnowns(const Variable& v)
 {
+    auto module = Module(v);
+    auto mappedModuleVariable = MappedModuleVariable(v, module);
+    if (mappedModuleVariable.getVaHost() != v.getVaHost() || mappedModuleVariable != v) {
+        module->PrintVarKnowns(mappedModuleVariable);
+        return;
+    }
 	std::cout << v << " =";
 	auto solutions = Solve(v);
 	for (auto& solution : solutions) {
@@ -327,27 +371,79 @@ Skrypt::module_t Skrypt::GetLoadedModule(std::string_view fileName) const {
 }
 
 bool Skrypt::IsModuleLoading(std::string_view name) const {
-	IMPLEMENT
-
+	std::shared_lock lock(modulesLoadingMutex);
+    return modulesLoading.contains(name);
 }
 
-Skrypt::module_t Skrypt::Module(std::string_view fileName) {
-    auto loaded = GetLoadedModule(fileName);
-	// TODO : check if the module is being loaded
-	// if (IsModuleLoading(fileName)) { }
-    if (!loaded) {
-        auto skrypt = std::make_shared<Skrypt>();
-        skrypt->Echo({}); // Silence!
-		skrypt->Load(FindModulePath(fileName));
-        std::unique_lock lock(modulesMapMutex);
-        auto module = modules.emplace(fileName, std::move(skrypt));
-        loaded = module.first->second;
+Skrypt::module_t Skrypt::Module(std::string_view name) {
+    auto module = GetLoadedModule(name);
+    if (!module) {
+		auto isCurrentlyLoading = IsModuleLoading(name);
+        if (isCurrentlyLoading) {
+			std::unique_lock lock(modulesLoadingMutex);
+			auto loading = modulesLoading.find(std::string(name));
+			if (loading != modulesLoading.end()) {
+				module = loading->second;
+            } else {
+				// probably loaded in the meantime
+				module = GetLoadedModule(name);
+            }
+        }
+        if (!module) {
+			std::unique_lock lock(modulesLoadingMutex);
+            module = std::make_shared<Skrypt>();
+            auto insertedLoadingModules = modulesLoading.emplace(name, module);
+			auto inserted = insertedLoadingModules.second;
+            isCurrentlyLoading = !inserted;
+            if (isCurrentlyLoading) {
+				module = insertedLoadingModules.first->second;
+			}
+        }
+        {
+			std::unique_lock lock(modulesMapMutex);
+            auto insertedToModules = modules.emplace(name, module);
+            auto inserted = insertedToModules.second;
+            if (!inserted) {
+				module = insertedToModules.first->second;
+			}
+		}
+        if (!isCurrentlyLoading) {
+            module->Echo({});
+            module->moduleFileSearchAdditionalPaths = moduleFileSearchAdditionalPaths;
+            module->Load(FindModulePath(name));
+
+			std::unique_lock lock(modulesLoadingMutex);
+            auto loading = modulesLoading.find(std::string(name));
+            if (loading != modulesLoading.end()) {
+				modulesLoading.erase(loading);
+            } else {
+                std::cerr << "Module " << name << " was not found in the loading map" << std::endl; // race condition
+            }
+        } else {
+            // wait for the module to be loaded
+            bool waiting = true;
+            do {
+                auto loaded = modulesLoadingQueue.PeekNextResult();
+                auto it = loaded.find(name);
+                if (it != loaded.end()) {
+                    if (module != it->second.get()) {
+						IMPLEMENT
+					}
+					waiting = false;
+				}
+            } while (waiting);
+        }
     }
-	return loaded;
+	return module;
 }
 
 Skrypt::loading_module_t Skrypt::StartLoadingModule(std::string_view name) {
-    return std::async(std::launch::async, &Skrypt::Module, this, name);
+    return std::async(
+        std::launch::async, [this, name]() {
+            auto module = Module(name);
+            std::cout << "Module " << name << " loaded" << std::endl;
+            return module;
+    });
 }
 
 Skrypt::loading_modules_t Skrypt::LoadModules(const ::omnn::math::Valuable& v) {
@@ -406,23 +502,51 @@ std::string_view Skrypt::GetModuleName(const ::omnn::math::Variable& v) const {
     return GetModuleName(name);
 }
 
+Skrypt::module_t Skrypt::Module(const ::omnn::math::Variable& v) {
+    auto name = GetVariableName(v);
+    auto moduleName = GetModuleName(name);
+    if (moduleName.empty()) {
+        return {};
+    } else
+        return Module(moduleName);
+}
+
 const ::omnn::math::Valuable::solutions_t& Skrypt::Known(const ::omnn::math::Variable& v)
 {
-	auto known = base::Known(v);
-    if (known.size() == 0) {
-        auto name = GetVariableName(v);
-		auto moduleName = GetModuleName(name);
-		auto module = Module(GetModuleName(name));
-        name.remove_prefix(
-			moduleName.size()
-			+ 1 // '.'
-			);
-		auto& moduleVarNames = module->GetVarNames();
-        auto moduleVarIt = moduleVarNames.find(name);
-		if (moduleVarIt != moduleVarNames.end()) {
-			auto& moduleVar = moduleVarIt->second;
-            known = module->Known(moduleVar);
-		}
+	auto known = std::cref(base::Known(v));
+    if (known.get().size() == 0) {
+        auto module = Module(v);
+        auto mappedModuleVariable = MappedModuleVariable(v, module);
+        if (mappedModuleVariable.getVaHost() != v.getVaHost() || mappedModuleVariable != v) {
+            known = std::cref(module->Known(mappedModuleVariable));
+        }
+        if (known.get().size() == 0) {
+            auto name = GetVariableName(v);
+            auto moduleName = GetModuleName(name);
+            if (!moduleName.empty()) {
+                auto module = Module(moduleName);
+                name.remove_prefix(moduleName.size() + 1 // '.'
+                );
+                auto& moduleVarNames = module->GetVarNames();
+                auto moduleVarIt = moduleVarNames.find(name);
+                if (moduleVarIt == moduleVarNames.end()) {
+                    WaitTillModuleLoadingComplete(moduleName);
+                    moduleVarIt = moduleVarNames.find(name);
+                }
+                if (moduleVarIt != moduleVarNames.end()) {
+                    auto& moduleVar = moduleVarIt->second;
+                    known = std::cref(module->Known(moduleVar));
+                } else {
+                    auto solution = module->Solve(moduleVarIt->second);
+                    if (solution.size()) {
+                        known = std::cref(module->Known(moduleVarIt->second));
+                        if (known.get().size() == 0) {
+                            IMPLEMENT
+                        }
+                    }
+                }
+            }
+        }
 	}
     return known;
 }
