@@ -1,2 +1,4 @@
 
-lib(rt math)
+lib(rt math
+	Boost::dll
+	)

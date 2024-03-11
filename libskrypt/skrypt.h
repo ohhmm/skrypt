@@ -17,7 +17,8 @@ namespace skrypt {
 class Skrypt
     : public omnn::math::System
 {
-    using base = omnn::math::System;
+    using base = ::omnn::math::System;
+    using path = ::boost::filesystem::path;
 
     ::omnn::math::VarHost::ptr varHost = ::omnn::math::VarHost::make<std::string>();
 
@@ -36,7 +37,8 @@ class Skrypt
     mutable std::shared_mutex modulesLoadingMutex;
     modules_t modulesLoading;
     ::omnn::rt::StoringTasksQueue<loading_modules_t> modulesLoadingQueue;
-    ::boost::filesystem::path sourceFilePath;
+    path sourceFilePath;
+    std::vector<path> moduleFileSearchAdditionalPaths;
 
 protected:
     void SetVarhost(decltype(varHost));
@@ -81,19 +83,31 @@ public:
     /// <param name="name">The module name</param>
     module_t Module(std::string_view name);
     module_t Module(const ::omnn::math::Variable&);
-    module_t GetLoadedModule(std::string_view fileName) const;
+    module_t GetLoadedModule(std::string_view name) const;
 
     boost::filesystem::path FindModulePath(std::string_view name) const;
+    template <class T>
+    void AddModuleSearchDirPath(T&& p) {
+		moduleFileSearchAdditionalPaths.emplace_back(std::forward<T>(p));
+    }
     bool IsModuleLoading(std::string_view name) const;
     loading_module_t StartLoadingModule(std::string_view name);
     loading_modules_t LoadModules(const ::omnn::math::Valuable& v);
     loading_modules_future_t StartLoadingModules(const ::omnn::math::Valuable& v);
-
+    module_t WaitTillModuleLoadingComplete(std::string_view name);
     void BackgroudLoadingModules(const ::omnn::math::Valuable& v);
     std::string_view GetVariableName(const ::omnn::math::Variable&) const;
     std::string_view GetModuleName(std::string_view variableName) const;
     std::string_view GetModuleName(const ::omnn::math::Variable&) const;
     const solutions_t& Known(const ::omnn::math::Variable& v);
+
+    /// <summary>
+    /// Obtainse the <variable> from the <module> by its local representation variable <module>.<variable>
+    /// If module object providen, the variable is obtained from it, otherwise the module deduced from the variable name
+    /// </summary>
+    /// <param name="variable">The variable</param>
+    /// <param name="module">The module (optional)</param>
+    /// <returns>Variable of submodule skrypt object</returns>
     const ::omnn::math::Variable& MappedModuleVariable(const ::omnn::math::Variable&, module_t module = {});
 
     void Echo(bool e) { echo = e; }
