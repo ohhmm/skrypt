@@ -8,6 +8,8 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/iostreams/device/mapped_file.hpp>
 #include <boost/iostreams/filtering_stream.hpp>
+#include <boost/dll/runtime_symbol_info.hpp>
+#include <boost/dll/shared_library.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -88,6 +90,7 @@ void Skrypt::PrintVarKnowns(const Variable& v)
     auto module = Module(v);
     auto mappedModuleVariable = MappedModuleVariable(v, module);
     if (mappedModuleVariable.getVaHost() != v.getVaHost() || mappedModuleVariable != v) {
+        std::cout << GetModuleName(v) << '.';
         module->PrintVarKnowns(mappedModuleVariable);
         return;
     }
@@ -334,7 +337,10 @@ const omnn::math::Valuable::va_names_t& Skrypt::Load(std::istream& in)
 const omnn::math::Valuable::va_names_t& Skrypt::Load(const boost::filesystem::path & path)
 {
 	std::cout << "Loading " << path << '\n' << std::endl;
-	boost::filesystem::ifstream stream(path);
+    auto filepath = boost::filesystem::exists(path)
+        ? path
+        : FindModulePath({path.string()});
+    boost::filesystem::ifstream stream(filepath);
 	return Load(stream);
 }
 
@@ -356,6 +362,36 @@ boost::filesystem::path Skrypt::FindModulePath(std::string_view name) const {
         path.replace_extension(".skrypt");
     if (!boost::filesystem::exists(path)) {
         path = path.filename();
+    }
+    auto base = boost::dll::program_location();
+    if (!boost::filesystem::exists(path)) {
+        path = base.parent_path() / name;
+        if (!path.has_extension())
+            path.replace_extension(".skrypt");
+    }
+
+    if (!boost::filesystem::exists(path)) {
+        auto loc = boost::dll::this_line_location();
+        if (loc != base) {
+            path = loc.parent_path() / name;
+            if (!path.has_extension())
+                path.replace_extension(".skrypt");
+        }
+    }
+
+    if (!boost::filesystem::exists(path)) {
+        for (auto& searchPath : moduleFileSearchAdditionalPaths) {
+			path = searchPath / name;
+			if (!path.has_extension())
+				path.replace_extension(".skrypt");
+            if (boost::filesystem::exists(path)) {
+				break;
+			}
+		}
+    }
+
+    if (!boost::filesystem::exists(path)) {
+        std::cerr << "Module not found: " << path << std::endl;
     }
     return path;
 }
@@ -509,6 +545,28 @@ Skrypt::module_t Skrypt::Module(const ::omnn::math::Variable& v) {
         return {};
     } else
         return Module(moduleName);
+}
+
+Skrypt::module_t Skrypt::WaitTillModuleLoadingComplete(std::string_view name) {
+    bool isModuleLoading = IsModuleLoading(name);
+    if (isModuleLoading) {
+        do {
+            if (isModuleLoading) {
+                auto loaded = modulesLoadingQueue.PeekNextResult();
+                auto it = loaded.find(name);
+                if (it != loaded.end()) {
+                    return it->second.get();
+                }
+                isModuleLoading = IsModuleLoading(name);
+                if (isModuleLoading) {
+                    std::this_thread::yield();
+                } else {
+                    break;
+                }
+            }
+        } while (isModuleLoading);
+    }
+    return Module(name);
 }
 
 const ::omnn::math::Valuable::solutions_t& Skrypt::Known(const ::omnn::math::Variable& v)

@@ -12,7 +12,8 @@ BOOST_AUTO_TEST_CASE(LoadingModulesNoExceptionsTest) {
 
 BOOST_AUTO_TEST_CASE(ModulePropertyTest) {
     Skrypt skrypt;
-    skrypt.Load(TEST_SRC_DIR "Module.skrypt");
+    skrypt.AddModuleSearchDirPath(TEST_SRC_DIR);
+    skrypt.Load("Module.skrypt");
 
     // get the variable
     auto variableName = "x"s;
