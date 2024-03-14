@@ -16,7 +16,7 @@ BOOST_AUTO_TEST_CASE(skryptissue10test){
     auto& pendingTheVariable = varhost->Host(variableName);
 
     // check that the variable is already solved
-    auto pendingVariableSolutions = skrypt.Known(pendingTheVariable);
+    auto& pendingVariableSolutions = skrypt.Known(pendingTheVariable);
     BOOST_TEST(pendingVariableSolutions.size() == 1);
     for (auto& solution : pendingVariableSolutions) {
         BOOST_TEST(solution == 10);
