@@ -62,6 +62,7 @@ public:
     bool Add(std::string_view);
     bool ParseNextLine(std::istream&, std::string_view&);
     void PrintVarKnowns(const omnn::math::Variable&);
+    void PrintAllKnowns();
     void ProcessQuestionLine(std::string_view&);
 
     /// <summary>

@@ -105,6 +105,13 @@ void Skrypt::PrintVarKnowns(const Variable& v)
 	std::cout << std::endl;
 }
 
+void Skrypt::PrintAllKnowns()
+{
+    for (auto& [name, var] : vars) {
+        PrintVarKnowns(var);
+    }
+}
+
 bool Skrypt::Add(std::string_view line) {
 	Valuable v(line, varHost);
     BackgroudLoadingModules(v);
@@ -151,9 +158,7 @@ void Skrypt::ProcessQuestionLine(std::string_view& line)
     Valuable::YesNoMaybe is = Valuable::YesNoMaybe::Maybe;
     auto questionless = Questionless(line);
     if (questionless.empty()) {
-        for (auto& [name, var] : vars) {
-            PrintVarKnowns(var);
-        }
+        PrintAllKnowns();
     }
 	else {
 		Valuable expression(questionless, varHost);
@@ -471,13 +476,34 @@ Skrypt::module_t Skrypt::Module(std::string_view name) {
 	return module;
 }
 
-Skrypt::loading_module_t Skrypt::StartLoadingModule(std::string_view name) {
-    std::cout << "Module " << name << " loading started" << std::endl;
-    return std::async(
-        std::launch::async, [this, name]() {
-            auto module = Module(name);
-            std::cout << "Module " << name << " loaded" << std::endl;
-            return module;
+Skrypt::loading_module_t Skrypt::StartLoadingModule(std::string_view moduleName) {
+    std::cout << "Module " << moduleName << " loading started" << std::endl;
+    return std::async(std::launch::async, [this, moduleName]() {
+        auto module = Module(moduleName);
+        std::cout << "Module " << moduleName << " loaded:" << std::endl;
+        module->PrintAllKnowns();
+
+        // Import known variables from the module TODO: through Binder
+        const auto& moduleVarNames = module->GetVarNames();
+        for (auto& [name, var] : moduleVarNames) {
+            auto& knowns = module->Known(var);
+            auto knownSolutionsNumber = knowns.size();
+            if (knownSolutionsNumber) {
+                std::string varName(moduleName);
+                varName += '.';
+                varName += name;
+                auto& v = varHost->Host(varName);
+                if (knownSolutionsNumber == 1)
+                    Add(v, *knowns.begin());
+                else {
+                    auto& solutions = Yarns(v)[{}];
+                    for (auto& solution : knowns) {
+                        solutions.insert(solution);
+					}
+                }
+            }
+        }
+        return module;
     });
 }
 
@@ -601,8 +627,12 @@ const ::omnn::math::Valuable::solutions_t& Skrypt::Known(const ::omnn::math::Var
             } else {
                 WaitAllModulesLoadingComplete();
                 known = std::cref(base::Known(v));
-            }
-        }
+                if (known.get().size() == 0) {
+                    Solve(v);
+					known = std::cref(base::Known(v));
+				}
+			}
+		}
 	}
     return known;
 }
