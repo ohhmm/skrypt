@@ -91,11 +91,20 @@ public:
 		moduleFileSearchAdditionalPaths.emplace_back(std::forward<T>(p));
     }
     bool IsModuleLoading(std::string_view name) const;
+
     loading_module_t StartLoadingModule(std::string_view name);
     loading_modules_t LoadModules(const ::omnn::math::Valuable& v);
     loading_modules_future_t StartLoadingModules(const ::omnn::math::Valuable& v);
-    module_t WaitTillModuleLoadingComplete(std::string_view name);
     void BackgroudLoadingModules(const ::omnn::math::Valuable& v);
+
+    /// <summary>
+    /// Wait for the module to be loaded
+    /// </summary>
+    /// <param name="name"></param>
+    /// <returns></returns>
+    module_t WaitTillModuleLoadingComplete(std::string_view name);
+    void WaitAllModulesLoadingComplete();
+
     std::string_view GetVariableName(const ::omnn::math::Variable&) const;
     std::string_view GetModuleName(std::string_view variableName) const;
     std::string_view GetModuleName(const ::omnn::math::Variable&) const;

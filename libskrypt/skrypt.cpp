@@ -55,6 +55,9 @@ const ::omnn::math::Variable& Skrypt::MappedModuleVariable(const ::omnn::math::V
         );
         if (!module) {
             module = Module(moduleName);
+        } else if (IsModuleLoading(moduleName)) {
+            if(module != WaitTillModuleLoadingComplete(moduleName))
+                LOG_AND_IMPLEMENT("Module provided does not match");
         }
         auto& moduleVarNames = module->GetVarNames();
         auto moduleVarIt = moduleVarNames.find(name);
@@ -411,6 +414,12 @@ bool Skrypt::IsModuleLoading(std::string_view name) const {
     return modulesLoading.contains(name);
 }
 
+void Skrypt::WaitAllModulesLoadingComplete() {
+    while (!modulesLoadingQueue.empty()) {
+        modulesLoadingQueue.PeekNextResult();
+    }
+}
+
 Skrypt::module_t Skrypt::Module(std::string_view name) {
     auto module = GetLoadedModule(name);
     if (!module) {
@@ -449,31 +458,21 @@ Skrypt::module_t Skrypt::Module(std::string_view name) {
             module->Load(FindModulePath(name));
 
 			std::unique_lock lock(modulesLoadingMutex);
-            auto loading = modulesLoading.find(std::string(name));
+            auto loading = modulesLoading.find(name);
             if (loading != modulesLoading.end()) {
 				modulesLoading.erase(loading);
             } else {
                 std::cerr << "Module " << name << " was not found in the loading map" << std::endl; // race condition
             }
         } else {
-            // wait for the module to be loaded
-            bool waiting = true;
-            do {
-                auto loaded = modulesLoadingQueue.PeekNextResult();
-                auto it = loaded.find(name);
-                if (it != loaded.end()) {
-                    if (module != it->second.get()) {
-						IMPLEMENT
-					}
-					waiting = false;
-				}
-            } while (waiting);
+            WaitTillModuleLoadingComplete(name);
         }
     }
 	return module;
 }
 
 Skrypt::loading_module_t Skrypt::StartLoadingModule(std::string_view name) {
+    std::cout << "Module " << name << " loading started" << std::endl;
     return std::async(
         std::launch::async, [this, name]() {
             auto module = Module(name);
@@ -489,20 +488,16 @@ Skrypt::loading_modules_t Skrypt::LoadModules(const ::omnn::math::Valuable& v) {
         if (dot != std::string::npos) {
             auto moduleName = name.substr(0, dot);
             auto loading = loadingModules.find(std::string(moduleName));
-            if (loading == loadingModules.end()) {
-                // not loading yet
+            if (loading == loadingModules.end()) { // not loading here yet
+                auto loaded = GetLoadedModule(moduleName);
+                if (loaded)
                 {
-                    std::shared_lock lock(modulesMapMutex);
-                    auto loaded = modules.find(moduleName);
-                    if (loaded != modules.end()) {
-                        // already loaded
-                        std::promise<module_t> promise;
-                        promise.set_value(loaded->second);
-                        loadingModules.emplace(moduleName, promise.get_future());
-                        continue;
-                    }
+                    std::promise<module_t> promise;
+                    promise.set_value(loaded);
+                    loadingModules.emplace(moduleName, promise.get_future());
+                } else {
+                    loadingModules.emplace(moduleName, StartLoadingModule(moduleName));
                 }
-                loadingModules.emplace(moduleName, StartLoadingModule(moduleName));
             }
         }
     }
@@ -603,6 +598,9 @@ const ::omnn::math::Valuable::solutions_t& Skrypt::Known(const ::omnn::math::Var
                         }
                     }
                 }
+            } else {
+                WaitAllModulesLoadingComplete();
+                known = std::cref(base::Known(v));
             }
         }
 	}
