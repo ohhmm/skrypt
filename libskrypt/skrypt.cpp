@@ -11,8 +11,8 @@
 #include <boost/dll/runtime_symbol_info.hpp>
 #include <boost/dll/shared_library.hpp>
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <string>
 
 
@@ -365,7 +365,7 @@ Skrypt::Skrypt(std::istream & stream)
 }
 
 boost::filesystem::path Skrypt::FindModulePath(std::string_view name) const {
-	auto path = sourceFilePath.parent_path() / name;
+    auto path = sourceFilePath.parent_path() / name;
     if (!path.has_extension())
         path.replace_extension(".skrypt");
     if (!boost::filesystem::exists(path)) {
@@ -406,16 +406,16 @@ boost::filesystem::path Skrypt::FindModulePath(std::string_view name) const {
 
 Skrypt::module_t Skrypt::GetLoadedModule(std::string_view fileName) const {
     module_t loaded;
-	std::shared_lock lock(modulesMapMutex);
-	auto it = modules.find(fileName);
-	if (it != modules.end()) {
-		loaded = it->second;
-	}
-	return loaded;
+    std::shared_lock lock(modulesMapMutex);
+    auto it = modules.find(fileName);
+    if (it != modules.end()) {
+        loaded = it->second;
+    }
+    return loaded;
 }
 
 bool Skrypt::IsModuleLoading(std::string_view name) const {
-	std::shared_lock lock(modulesLoadingMutex);
+    std::shared_lock lock(modulesLoadingMutex);
     return modulesLoading.contains(name);
 }
 
@@ -473,7 +473,7 @@ Skrypt::module_t Skrypt::Module(std::string_view name) {
             WaitTillModuleLoadingComplete(name);
         }
     }
-	return module;
+    return module;
 }
 
 Skrypt::loading_module_t Skrypt::StartLoadingModule(std::string_view moduleName) {
@@ -539,9 +539,9 @@ void Skrypt::BackgroudLoadingModules(const ::omnn::math::Valuable& v) {
 }
 
 std::string_view Skrypt::GetVariableName(const ::omnn::math::Variable& v) const {
-	auto host = v.getVaHost();
-	auto name = host->GetName(v.getId());
-	return name;
+    auto host = v.getVaHost();
+    auto name = host->GetName(v.getId());
+    return name;
 }
 
 std::string_view Skrypt::GetModuleName(std::string_view name) const {
