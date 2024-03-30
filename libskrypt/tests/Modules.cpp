@@ -7,7 +7,8 @@ using namespace std::string_literals;
 using namespace std::string_view_literals;
 
 BOOST_AUTO_TEST_CASE(LoadingModulesNoExceptionsTest) {
-    Skrypt(TEST_SRC_DIR "Module.skrypt");
+    Skrypt skrypt(TEST_SRC_DIR "Module.skrypt");
+    auto copy = skrypt;
 }
 
 BOOST_AUTO_TEST_CASE(ModulePropertyTest) {
