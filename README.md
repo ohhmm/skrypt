@@ -1,7 +1,7 @@
 # SKRYPT
 Serg Kryvonos Relation Yarn Plausibility Tool
 
-This is the software designed to hold the whole of ergo.
+This is the software designed to hold the whole of ergo in the form of rule-based very high level stateless functional scripting math domain specific software development language.
 
 Accepts three forms of input:
 
