@@ -404,7 +404,7 @@ boost::filesystem::path Skrypt::FindModulePath(std::string_view name) const {
     return path;
 }
 
-Skrypt::module_t Skrypt::GetLoadedModule(std::string_view fileName) const {
+Skrypt::module_t Skrypt::GetLoadedModule(std::string_view fileName) {
     module_t loaded;
     std::shared_lock lock(modulesMapMutex);
     auto it = modules.find(fileName);
@@ -414,7 +414,7 @@ Skrypt::module_t Skrypt::GetLoadedModule(std::string_view fileName) const {
     return loaded;
 }
 
-bool Skrypt::IsModuleLoading(std::string_view name) const {
+bool Skrypt::IsModuleLoading(std::string_view name) {
     std::shared_lock lock(modulesLoadingMutex);
     return modulesLoading.contains(name);
 }
@@ -635,4 +635,18 @@ const ::omnn::math::Valuable::solutions_t& Skrypt::Known(const ::omnn::math::Var
 		}
 	}
     return known;
+}
+
+// TODO : delete this in favour of moving non-copiable modules to shared modules loader
+Skrypt::Skrypt(const skrypt::Skrypt& that)
+    : base(that)
+    , varHost(that.varHost)
+    , vars(that.vars)
+    , echo(that.echo)
+    , disjunctionParseMode(that.disjunctionParseMode)
+    , modules(that.modules)
+    , modulesLoading(that.modulesLoading)
+    , sourceFilePath(that.sourceFilePath)
+    , moduleFileSearchAdditionalPaths(that.moduleFileSearchAdditionalPaths)
+{
 }

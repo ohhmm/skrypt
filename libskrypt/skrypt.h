@@ -33,8 +33,8 @@ class Skrypt
     using loading_modules_future_t = std::future<loading_modules_t>;
 
     modules_t modules;
-    mutable std::shared_mutex modulesMapMutex;
-    mutable std::shared_mutex modulesLoadingMutex;
+    std::shared_mutex modulesMapMutex;
+    std::shared_mutex modulesLoadingMutex;
     modules_t modulesLoading;
     ::omnn::rt::StoringTasksQueue<loading_modules_t> modulesLoadingQueue;
     path sourceFilePath;
@@ -51,6 +51,7 @@ public:
     using value_type = omnn::math::Valuable;
 
     Skrypt() {}
+    Skrypt(const Skrypt&);
     Skrypt(const boost::filesystem::path&);
     Skrypt(std::istream&);
 
@@ -84,14 +85,14 @@ public:
     /// <param name="name">The module name</param>
     module_t Module(std::string_view name);
     module_t Module(const ::omnn::math::Variable&);
-    module_t GetLoadedModule(std::string_view name) const;
+    module_t GetLoadedModule(std::string_view name);
 
     boost::filesystem::path FindModulePath(std::string_view name) const;
     template <class T>
     void AddModuleSearchDirPath(T&& p) {
 		moduleFileSearchAdditionalPaths.emplace_back(std::forward<T>(p));
     }
-    bool IsModuleLoading(std::string_view name) const;
+    bool IsModuleLoading(std::string_view name);
 
     loading_module_t StartLoadingModule(std::string_view name);
     loading_modules_t LoadModules(const ::omnn::math::Valuable& v);
