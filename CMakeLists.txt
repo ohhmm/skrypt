@@ -40,3 +40,5 @@ endif(BUILD_TESTS OR OPENMIND_BUILD_TESTS)
 
 # OpenMind: traverse subprojects
 fold(libskrypt) # parse libskrypt prior to skrypt
+
+install(DIRECTORY modules DESTINATION modules)
