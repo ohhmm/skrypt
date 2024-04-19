@@ -8,7 +8,7 @@ using namespace std::string_view_literals;
 
 BOOST_AUTO_TEST_CASE(skryptissue10test){
     Skrypt skrypt;
-    skrypt.Load(TEST_SRC_DIR "10.skrypt");
+    skrypt.Load(TEST_SRC_DIR "TestIssue10.skrypt");
 
     // get the variable
     auto variableName = "pending"s;
