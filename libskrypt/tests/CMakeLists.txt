@@ -6,8 +6,11 @@ project(SkryptTests)
 # Include the libskrypt directory to access the library functions
 include_directories(${CMAKE_SOURCE_DIR}/libskrypt)
 
+# Include the openmind headers
+include_directories(${CMAKE_SOURCE_DIR}/_deps/openmind-src)
+
 # Specify the C++ standard
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # Find the Boost library components
