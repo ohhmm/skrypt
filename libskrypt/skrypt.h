@@ -1,5 +1,5 @@
 #pragma once
-#include "../../_deps/openmind-src/omnn/rt/tasq.h"
+#include <omnn/rt/tasq.h>
 #include <omnn/math/System.h>
 #include <omnn/math/VarHost.h>
 
