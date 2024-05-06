@@ -45,7 +45,7 @@ find_package(Threads)
 
 if(BUILD_TESTS OR OPENMIND_BUILD_TESTS)
     enable_testing()
-    add_subdirectory(tests)
+    add_subdirectory(libskrypt/tests)
 endif(BUILD_TESTS OR OPENMIND_BUILD_TESTS)
 
 # OpenMind: traverse subprojects
