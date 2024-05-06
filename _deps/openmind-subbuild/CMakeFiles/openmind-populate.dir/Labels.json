@@ -1,0 +1,46 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/home/ubuntu/skrypt/_deps/openmind-subbuild/CMakeFiles/openmind-populate"
+		},
+		{
+			"file" : "/home/ubuntu/skrypt/_deps/openmind-subbuild/CMakeFiles/openmind-populate.rule"
+		},
+		{
+			"file" : "/home/ubuntu/skrypt/_deps/openmind-subbuild/CMakeFiles/openmind-populate-complete.rule"
+		},
+		{
+			"file" : "/home/ubuntu/skrypt/_deps/openmind-subbuild/openmind-populate-prefix/src/openmind-populate-stamp/openmind-populate-build.rule"
+		},
+		{
+			"file" : "/home/ubuntu/skrypt/_deps/openmind-subbuild/openmind-populate-prefix/src/openmind-populate-stamp/openmind-populate-configure.rule"
+		},
+		{
+			"file" : "/home/ubuntu/skrypt/_deps/openmind-subbuild/openmind-populate-prefix/src/openmind-populate-stamp/openmind-populate-download.rule"
+		},
+		{
+			"file" : "/home/ubuntu/skrypt/_deps/openmind-subbuild/openmind-populate-prefix/src/openmind-populate-stamp/openmind-populate-install.rule"
+		},
+		{
+			"file" : "/home/ubuntu/skrypt/_deps/openmind-subbuild/openmind-populate-prefix/src/openmind-populate-stamp/openmind-populate-mkdir.rule"
+		},
+		{
+			"file" : "/home/ubuntu/skrypt/_deps/openmind-subbuild/openmind-populate-prefix/src/openmind-populate-stamp/openmind-populate-patch.rule"
+		},
+		{
+			"file" : "/home/ubuntu/skrypt/_deps/openmind-subbuild/openmind-populate-prefix/src/openmind-populate-stamp/openmind-populate-test.rule"
+		},
+		{
+			"file" : "/home/ubuntu/skrypt/_deps/openmind-subbuild/openmind-populate-prefix/src/openmind-populate-stamp/openmind-populate-update.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"openmind-populate"
+		],
+		"name" : "openmind-populate"
+	}
+}
