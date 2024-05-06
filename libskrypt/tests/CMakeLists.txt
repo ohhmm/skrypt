@@ -83,12 +83,12 @@ target_compile_definitions(ModulesTest PUBLIC
 )
 
 # Link test executables with the libskrypt library and necessary Boost components
-target_link_libraries(ChemistryTest libskrypt Boost::filesystem Boost::system Boost::serialization)
-target_link_libraries(ComparisonTest libskrypt Boost::filesystem Boost::system Boost::serialization)
-target_link_libraries(DisjConjTest libskrypt Boost::filesystem Boost::system Boost::serialization)
-target_link_libraries(TestExpPrecedence libskrypt Boost::filesystem Boost::system Boost::serialization)
-target_link_libraries(TestIssue10 libskrypt Boost::filesystem Boost::system Boost::serialization)
-target_link_libraries(ModulesTest libskrypt Boost::filesystem Boost::system Boost::serialization)
+target_link_libraries(ChemistryTest skrypt Boost::filesystem Boost::system Boost::serialization)
+target_link_libraries(ComparisonTest skrypt Boost::filesystem Boost::system Boost::serialization)
+target_link_libraries(DisjConjTest skrypt Boost::filesystem Boost::system Boost::serialization)
+target_link_libraries(TestExpPrecedence skrypt Boost::filesystem Boost::system Boost::serialization)
+target_link_libraries(TestIssue10 skrypt Boost::filesystem Boost::system Boost::serialization)
+target_link_libraries(ModulesTest skrypt Boost::filesystem Boost::system Boost::serialization)
 
 # Register tests with CTest
 enable_testing()
