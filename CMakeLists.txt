@@ -11,7 +11,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 option(OPENMIND_DEBUG_CHECKS "Additional debug checks" OFF)
 find_package(OpenCL)
-option(OPENMIND_USE_OPENCL "OpenCL GPU calculations" ${OpenCL_FOUND})
+option(OPENMIND_USE_OPENCL "OpenCL GPU calculations" OFF) # OpenCL support disabled
 option(OPENMIND_MATH_USE_LEVELDB_CACHE "DB cache solutions" ON)
 set(BOOST_ADDITIONAL_COMPONENTS ${BOOST_ADDITIONAL_COMPONENTS};program_options CACHE VERSION "Boost components" FORCE)
 # Tell OpenMind to use any boost version installed in the system if any
