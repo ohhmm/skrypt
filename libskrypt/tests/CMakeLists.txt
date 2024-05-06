@@ -10,6 +10,9 @@ include_directories(${CMAKE_SOURCE_DIR}/libskrypt)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+# Find the Boost library components
+find_package(Boost 1.74.0 REQUIRED COMPONENTS filesystem system serialization)
+
 # Message to confirm the tests configuration is being processed
 message(STATUS "Configuring tests...")
 
@@ -42,3 +45,6 @@ add_test(NAME Modules COMMAND ModulesTest)
 add_custom_target(build_tests ALL
     DEPENDS ChemistryTest ComparisonTest DisjConjTest TestExpPrecedence TestIssue10 ModulesTest
 )
+
+# Add a message to confirm that this CMakeLists.txt is being processed
+message(STATUS "libskrypt/tests CMakeLists.txt has been processed.")
