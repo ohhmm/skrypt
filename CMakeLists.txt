@@ -37,11 +37,11 @@ endif()
 find_package(Threads)
 
 # Fetch some OpenMind
-include(FetchContent)
-FetchContent_Declare(openmind
-    GIT_REPOSITORY https://github.com/ohhmm/openmind.git
-    GIT_TAG main)
-FetchContent_MakeAvailable(openmind)
+# include(FetchContent)
+# FetchContent_Declare(openmind
+#     GIT_REPOSITORY https://github.com/ohhmm/openmind.git
+#     GIT_TAG main)
+# FetchContent_MakeAvailable(openmind)
 
 if(BUILD_TESTS OR OPENMIND_BUILD_TESTS)
     enable_testing()
