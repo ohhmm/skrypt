@@ -1,0 +1,2 @@
+/usr/bin/ar qc liblibskrypt.a CMakeFiles/libskrypt.dir/skrypt.cpp.o
+/usr/bin/ranlib liblibskrypt.a
