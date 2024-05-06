@@ -52,6 +52,7 @@ add_custom_target(build_tests
     COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target TestExpPrecedence
     COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target TestIssue10
     COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target ModulesTest
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 )
 
 # Add a message to confirm that this CMakeLists.txt is being processed
