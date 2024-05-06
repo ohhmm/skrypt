@@ -392,7 +392,7 @@ Skrypt::Skrypt(std::istream & stream)
 }
 
 boost::filesystem::path Skrypt::FindModulePath(std::string_view name) const {
-    auto path = sourceFilePath.parent_path() / name;
+    auto path = sourceFilePath.parent_path() / std::string(name); // Convert std::string_view to std::string
     if (!path.has_extension())
         path.replace_extension(".skrypt");
     if (!boost::filesystem::exists(path)) {
@@ -400,7 +400,7 @@ boost::filesystem::path Skrypt::FindModulePath(std::string_view name) const {
     }
     auto base = boost::dll::program_location();
     if (!boost::filesystem::exists(path)) {
-        path = base.parent_path() / name;
+        path = base.parent_path() / std::string(name);
         if (!path.has_extension())
             path.replace_extension(".skrypt");
     }
@@ -408,7 +408,7 @@ boost::filesystem::path Skrypt::FindModulePath(std::string_view name) const {
     if (!boost::filesystem::exists(path)) {
         auto loc = boost::dll::this_line_location();
         if (loc != base) {
-            path = loc.parent_path() / name;
+            path = loc.parent_path() / std::string(name);
             if (!path.has_extension())
                 path.replace_extension(".skrypt");
         }
@@ -416,7 +416,7 @@ boost::filesystem::path Skrypt::FindModulePath(std::string_view name) const {
 
     if (!boost::filesystem::exists(path)) {
         for (auto& searchPath : moduleFileSearchAdditionalPaths) {
-			path = searchPath / name;
+			path = searchPath / std::string(name);
 			if (!path.has_extension())
 				path.replace_extension(".skrypt");
             if (boost::filesystem::exists(path)) {
