@@ -27,6 +27,61 @@ add_executable(TestExpPrecedence TestExpPrecedence.cpp)
 add_executable(TestIssue10 TestIssue10.cpp)
 add_executable(ModulesTest Modules.cpp)
 
+# Define macros unconditionally for all test targets
+target_compile_definitions(ChemistryTest PUBLIC
+    APPLE_CONSTEXPR=constexpr
+    NO_APPLE_CONSTEXPR=constexpr
+    NO_CLANG_CONSTEXPR=constexpr
+    MSVC_CONSTEXPR=constexpr
+    NO_MSVC_CONSTEXPR=constexpr
+    TEST_SRC_DIR="${CMAKE_SOURCE_DIR}/libskrypt/tests/"
+)
+
+target_compile_definitions(ComparisonTest PUBLIC
+    APPLE_CONSTEXPR=constexpr
+    NO_APPLE_CONSTEXPR=constexpr
+    NO_CLANG_CONSTEXPR=constexpr
+    MSVC_CONSTEXPR=constexpr
+    NO_MSVC_CONSTEXPR=constexpr
+    TEST_SRC_DIR="${CMAKE_SOURCE_DIR}/libskrypt/tests/"
+)
+
+target_compile_definitions(DisjConjTest PUBLIC
+    APPLE_CONSTEXPR=constexpr
+    NO_APPLE_CONSTEXPR=constexpr
+    NO_CLANG_CONSTEXPR=constexpr
+    MSVC_CONSTEXPR=constexpr
+    NO_MSVC_CONSTEXPR=constexpr
+    TEST_SRC_DIR="${CMAKE_SOURCE_DIR}/libskrypt/tests/"
+)
+
+target_compile_definitions(TestExpPrecedence PUBLIC
+    APPLE_CONSTEXPR=constexpr
+    NO_APPLE_CONSTEXPR=constexpr
+    NO_CLANG_CONSTEXPR=constexpr
+    MSVC_CONSTEXPR=constexpr
+    NO_MSVC_CONSTEXPR=constexpr
+    TEST_SRC_DIR="${CMAKE_SOURCE_DIR}/libskrypt/tests/"
+)
+
+target_compile_definitions(TestIssue10 PUBLIC
+    APPLE_CONSTEXPR=constexpr
+    NO_APPLE_CONSTEXPR=constexpr
+    NO_CLANG_CONSTEXPR=constexpr
+    MSVC_CONSTEXPR=constexpr
+    NO_MSVC_CONSTEXPR=constexpr
+    TEST_SRC_DIR="${CMAKE_SOURCE_DIR}/libskrypt/tests/"
+)
+
+target_compile_definitions(ModulesTest PUBLIC
+    APPLE_CONSTEXPR=constexpr
+    NO_APPLE_CONSTEXPR=constexpr
+    NO_CLANG_CONSTEXPR=constexpr
+    MSVC_CONSTEXPR=constexpr
+    NO_MSVC_CONSTEXPR=constexpr
+    TEST_SRC_DIR="${CMAKE_SOURCE_DIR}/libskrypt/tests/"
+)
+
 # Link test executables with the libskrypt library and necessary Boost components
 target_link_libraries(ChemistryTest libskrypt Boost::filesystem Boost::system Boost::serialization)
 target_link_libraries(ComparisonTest libskrypt Boost::filesystem Boost::system Boost::serialization)
