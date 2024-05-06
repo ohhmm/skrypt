@@ -21,6 +21,6 @@ package_add_test(TestExpPrecedence TestExpPrecedence.cpp)
 package_add_test(Comparison Comparison.cpp)
 package_add_test(Chemistry Chemistry.cpp)
 package_add_test(Modules Modules.cpp)
-# Add the fastest_get test
-package_add_test(fastest_get ${CMAKE_CURRENT_SOURCE_DIR}/../_deps/openmind-src/omnn/rt/tests/fastest_get.cpp)
+# The fastest_get test is already defined in the openmind-src submodule, so it's not added here again
+# package_add_test(fastest_get ${CMAKE_CURRENT_SOURCE_DIR}/../_deps/openmind-src/omnn/rt/tests/fastest_get.cpp)
 # ... Add other tests here
