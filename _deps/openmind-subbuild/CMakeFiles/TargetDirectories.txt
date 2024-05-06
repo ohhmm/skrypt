@@ -1,0 +1,3 @@
+/home/ubuntu/skrypt/_deps/openmind-subbuild/CMakeFiles/openmind-populate.dir
+/home/ubuntu/skrypt/_deps/openmind-subbuild/CMakeFiles/edit_cache.dir
+/home/ubuntu/skrypt/_deps/openmind-subbuild/CMakeFiles/rebuild_cache.dir

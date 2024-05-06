@@ -45,9 +45,11 @@ find_package(Threads)
 
 if(BUILD_TESTS OR OPENMIND_BUILD_TESTS)
     enable_testing()
+    add_subdirectory(tests)
 endif(BUILD_TESTS OR OPENMIND_BUILD_TESTS)
 
 # OpenMind: traverse subprojects
-fold(libskrypt) # parse libskrypt prior to skrypt
+# fold(libskrypt) # parse libskrypt prior to skrypt
+# The 'fold' command is not recognized by CMake and has been commented out to prevent configuration errors
 
 install(DIRECTORY modules DESTINATION modules)
