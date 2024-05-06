@@ -44,16 +44,5 @@ add_test(NAME ExpPrecedence COMMAND TestExpPrecedence)
 add_test(NAME Issue10 COMMAND TestIssue10)
 add_test(NAME Modules COMMAND ModulesTest)
 
-# Custom target to build all tests
-add_custom_target(build_tests
-    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target ChemistryTest
-    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target ComparisonTest
-    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target DisjConjTest
-    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target TestExpPrecedence
-    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target TestIssue10
-    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target ModulesTest
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-)
-
 # Add a message to confirm that this CMakeLists.txt is being processed
 message(STATUS "libskrypt/tests CMakeLists.txt has been processed.")
