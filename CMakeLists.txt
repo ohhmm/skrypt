@@ -1,5 +1,8 @@
 cmake_minimum_required (VERSION 3.8)
 
+# Define the project name and the languages used
+project(Skrypt LANGUAGES CXX)
+
 # Select C++ active standard
 enable_language(CXX)
 set (CMAKE_CXX_STANDARD 20)
@@ -35,7 +38,7 @@ FetchContent_Declare(openmind
 FetchContent_MakeAvailable(openmind)
 
 if(BUILD_TESTS OR OPENMIND_BUILD_TESTS)
-    enable_testing()    
+    enable_testing()
 endif(BUILD_TESTS OR OPENMIND_BUILD_TESTS)
 
 # OpenMind: traverse subprojects
