@@ -15,5 +15,8 @@ target_include_directories(skrypt PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-# Add the tests subdirectory
-add_subdirectory(tests)
+# Link the omnn static library with the skrypt target
+target_link_libraries(skrypt PUBLIC omnn)
+
+# The tests subdirectory is added conditionally in the top-level CMakeLists.txt
+# add_subdirectory(tests)
