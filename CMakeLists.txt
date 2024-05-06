@@ -43,6 +43,9 @@ find_package(Threads)
 #     GIT_TAG main)
 # FetchContent_MakeAvailable(openmind)
 
+# Add the libskrypt subdirectory
+add_subdirectory(libskrypt)
+
 if(BUILD_TESTS OR OPENMIND_BUILD_TESTS)
     enable_testing()
     add_subdirectory(libskrypt/tests)
