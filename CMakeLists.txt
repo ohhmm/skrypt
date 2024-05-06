@@ -36,23 +36,25 @@ endif()
 
 find_package(Threads)
 
-# Fetch some OpenMind
-# include(FetchContent)
-# FetchContent_Declare(openmind
-#     GIT_REPOSITORY https://github.com/ohhmm/openmind.git
-#     GIT_TAG main)
-# FetchContent_MakeAvailable(openmind)
+# Define BOOST_ALL_DYN_LINK to ensure dynamic linking of Boost libraries
+add_definitions(-DBOOST_ALL_DYN_LINK)
 
-# Add the libskrypt subdirectory
+# Find Boost libraries
+find_package(Boost 1.74.0 REQUIRED COMPONENTS filesystem system serialization thread unit_test_framework)
+
+# Include the openmind headers
+include_directories(${CMAKE_SOURCE_DIR}/_deps/openmind-src)
+include_directories(${CMAKE_SOURCE_DIR}/_deps/openmind-src/omnn)
+include_directories(${CMAKE_SOURCE_DIR}/_deps/openmind-src/omnn/math)
+include_directories(${CMAKE_SOURCE_DIR}/_deps/openmind-src/omnn/rt)
+
+# Add the libskrypt and openmind subdirectories
 add_subdirectory(libskrypt)
+add_subdirectory(_deps/openmind-src)
 
 if(BUILD_TESTS OR OPENMIND_BUILD_TESTS)
     enable_testing()
     add_subdirectory(libskrypt/tests)
 endif(BUILD_TESTS OR OPENMIND_BUILD_TESTS)
-
-# OpenMind: traverse subprojects
-# fold(libskrypt) # parse libskrypt prior to skrypt
-# The 'fold' command is not recognized by CMake and has been commented out to prevent configuration errors
 
 install(DIRECTORY modules DESTINATION modules)

@@ -8,13 +8,15 @@ include_directories(${CMAKE_SOURCE_DIR}/libskrypt)
 
 # Include the openmind headers
 include_directories(${CMAKE_SOURCE_DIR}/_deps/openmind-src)
+include_directories(${CMAKE_SOURCE_DIR}/_deps/openmind-src/omnn/math)
+include_directories(${CMAKE_SOURCE_DIR}/_deps/openmind-src/omnn/rt)
 
 # Specify the C++ standard
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # Find the Boost library components
-find_package(Boost 1.74.0 REQUIRED COMPONENTS filesystem system serialization)
+find_package(Boost 1.74.0 REQUIRED COMPONENTS filesystem system serialization thread unit_test_framework)
 
 # Message to confirm the tests configuration is being processed
 message(STATUS "Configuring tests...")
@@ -83,12 +85,12 @@ target_compile_definitions(ModulesTest PUBLIC
 )
 
 # Link test executables with the libskrypt library and necessary Boost components
-target_link_libraries(ChemistryTest skrypt Boost::filesystem Boost::system Boost::serialization)
-target_link_libraries(ComparisonTest skrypt Boost::filesystem Boost::system Boost::serialization)
-target_link_libraries(DisjConjTest skrypt Boost::filesystem Boost::system Boost::serialization)
-target_link_libraries(TestExpPrecedence skrypt Boost::filesystem Boost::system Boost::serialization)
-target_link_libraries(TestIssue10 skrypt Boost::filesystem Boost::system Boost::serialization)
-target_link_libraries(ModulesTest skrypt Boost::filesystem Boost::system Boost::serialization)
+target_link_libraries(ChemistryTest skrypt Boost::filesystem Boost::system Boost::serialization Boost::thread Boost::unit_test_framework)
+target_link_libraries(ComparisonTest skrypt Boost::filesystem Boost::system Boost::serialization Boost::thread Boost::unit_test_framework)
+target_link_libraries(DisjConjTest skrypt Boost::filesystem Boost::system Boost::serialization Boost::thread Boost::unit_test_framework)
+target_link_libraries(TestExpPrecedence skrypt Boost::filesystem Boost::system Boost::serialization Boost::thread Boost::unit_test_framework)
+target_link_libraries(TestIssue10 skrypt Boost::filesystem Boost::system Boost::serialization Boost::thread Boost::unit_test_framework)
+target_link_libraries(ModulesTest skrypt Boost::filesystem Boost::system Boost::serialization Boost::thread Boost::unit_test_framework)
 
 # Register tests with CTest
 enable_testing()
