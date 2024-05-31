@@ -11,7 +11,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 option(OPENMIND_DEBUG_CHECKS "Additional debug checks" OFF)
 find_package(OpenCL)
-option(OPENMIND_USE_OPENCL "OpenCL GPU calculations" ${OpenCL_FOUND})
+option(OPENMIND_USE_OPENCL "OpenCL GPU calculations" ${OpenCl_FOUND})
 option(OPENMIND_MATH_USE_LEVELDB_CACHE "DB cache solutions" ON)
 set(BOOST_ADDITIONAL_COMPONENTS ${BOOST_ADDITIONAL_COMPONENTS} dll;program_options)
 list(REMOVE_DUPLICATES BOOST_ADDITIONAL_COMPONENTS)
@@ -53,3 +53,6 @@ set(Boost_DIR /usr/local/boost_1_74_0/lib/cmake/Boost-1.74.0 CACHE PATH "Boost l
 
 # Comment out IntelDPCPP and libIntelDPCPP package requirements
 # find_optional_pkg(IntelDPCPP)
+
+# Define BOOST_UBLAS_CXX_STANDARD to C++14
+add_definitions(-DBOOST_UBLAS_CXX_STANDARD=14)
