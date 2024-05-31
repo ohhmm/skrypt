@@ -1,5 +1,8 @@
 cmake_minimum_required (VERSION 3.8)
 
+# Project name
+project(skrypt)
+
 # Select C++ active standard
 enable_language(CXX)
 set (CMAKE_CXX_STANDARD 20)
@@ -10,10 +13,11 @@ option(OPENMIND_DEBUG_CHECKS "Additional debug checks" OFF)
 find_package(OpenCL)
 option(OPENMIND_USE_OPENCL "OpenCL GPU calculations" ${OpenCL_FOUND})
 option(OPENMIND_MATH_USE_LEVELDB_CACHE "DB cache solutions" ON)
-set(BOOST_ADDITIONAL_COMPONENTS program_options;dll CACHE VERSION "Boost components" FORCE)
+set(BOOST_ADDITIONAL_COMPONENTS program_options;dll CACHE STRING "Boost components" FORCE)
+
 # Tell OpenMind to use any boost version installed in the system if any
 if(Boost_FOUND)
-    set(OPENMIND_REQUIRED_BOOST_VERSION ${Boost_VERSION_STRING} CACHE VERSION "Boost library version to use" FORCE)
+    set(OPENMIND_REQUIRED_BOOST_VERSION ${Boost_VERSION_STRING} CACHE STRING "Boost library version to use" FORCE)
 endif()
 
 # Find some Git
@@ -35,10 +39,13 @@ FetchContent_Declare(openmind
 FetchContent_MakeAvailable(openmind)
 
 if(BUILD_TESTS OR OPENMIND_BUILD_TESTS)
-    enable_testing()    
+    enable_testing()
 endif(BUILD_TESTS OR OPENMIND_BUILD_TESTS)
 
 # OpenMind: traverse subprojects
 fold(libskrypt) # parse libskrypt prior to skrypt
+
+# Include bins.cmake to define necessary macros
+include(${CMAKE_SOURCE_DIR}/_deps/openmind-src/cmake/bins.cmake)
 
 install(DIRECTORY modules DESTINATION modules)
