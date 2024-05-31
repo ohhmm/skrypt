@@ -42,10 +42,13 @@ if(BUILD_TESTS OR OPENMIND_BUILD_TESTS)
     enable_testing()
 endif(BUILD_TESTS OR OPENMIND_BUILD_TESTS)
 
-# OpenMind: traverse subprojects
-fold(libskrypt) # parse libskrypt prior to skrypt
-
 # Include bins.cmake to define necessary macros
 include(${CMAKE_SOURCE_DIR}/_deps/openmind-src/cmake/bins.cmake)
 
 install(DIRECTORY modules DESTINATION modules)
+
+# Set Boost directory to the correct path for Boost 1.74.0
+set(Boost_DIR /usr/local/boost_1_74_0/lib/cmake/Boost-1.74.0 CACHE PATH "Boost library directory")
+
+# Comment out IntelDPCPP and libIntelDPCPP package requirements
+# find_optional_pkg(IntelDPCPP)
