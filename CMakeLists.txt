@@ -1,5 +1,9 @@
 cmake_minimum_required (VERSION 3.8)
 
+# Project name
+project(skrypt)
+
+# Select C++ active standard
 enable_language(CXX)
 set (CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -14,7 +18,7 @@ list(REMOVE_DUPLICATES BOOST_ADDITIONAL_COMPONENTS)
 set(BOOST_ADDITIONAL_COMPONENTS ${BOOST_ADDITIONAL_COMPONENTS} CACHE VERSION "Boost components" FORCE)
 # Tell OpenMind to use any boost version installed in the system if any
 if(Boost_FOUND)
-    set(OPENMIND_REQUIRED_BOOST_VERSION ${Boost_VERSION_STRING} CACHE VERSION "Boost library version to use" FORCE)
+    set(OPENMIND_REQUIRED_BOOST_VERSION ${Boost_VERSION_STRING} CACHE STRING "Boost library version to use" FORCE)
 endif()
 
 # Find some Git
