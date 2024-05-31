@@ -5,15 +5,15 @@ project(skrypt)
 
 # Select C++ active standard
 enable_language(CXX)
-set (CMAKE_CXX_STANDARD 20)
+set (CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 option(OPENMIND_DEBUG_CHECKS "Additional debug checks" OFF)
 find_package(OpenCL)
-option(OPENMIND_USE_OPENCL "OpenCL GPU calculations" ${OpenCL_FOUND})
+option(OPENMIND_USE_OPENCL "OpenCL GPU calculations" ${OpenCl_FOUND})
 option(OPENMIND_MATH_USE_LEVELDB_CACHE "DB cache solutions" ON)
-set(BOOST_ADDITIONAL_COMPONENTS program_options;dll CACHE STRING "Boost components" FORCE)
+set(BOOST_ADDITIONAL_COMPONENTS program_options CACHE STRING "Boost components" FORCE)
 
 # Tell OpenMind to use any boost version installed in the system if any
 if(Boost_FOUND)
@@ -52,3 +52,6 @@ set(Boost_DIR /usr/local/boost_1_74_0/lib/cmake/Boost-1.74.0 CACHE PATH "Boost l
 
 # Comment out IntelDPCPP and libIntelDPCPP package requirements
 # find_optional_pkg(IntelDPCPP)
+
+# Define BOOST_UBLAS_CXX_STANDARD to C++14
+add_definitions(-DBOOST_UBLAS_CXX_STANDARD=14)
