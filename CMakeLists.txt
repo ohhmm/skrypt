@@ -1,5 +1,8 @@
 cmake_minimum_required (VERSION 3.8)
 
+# Define the project name and the languages used
+project(Skrypt LANGUAGES CXX)
+
 # Select C++ active standard
 enable_language(CXX)
 set (CMAKE_CXX_STANDARD 20)
@@ -8,7 +11,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 option(OPENMIND_DEBUG_CHECKS "Additional debug checks" OFF)
 find_package(OpenCL)
-option(OPENMIND_USE_OPENCL "OpenCL GPU calculations" ${OpenCL_FOUND})
+option(OPENMIND_USE_OPENCL "OpenCL GPU calculations" OFF) # OpenCL support disabled
 option(OPENMIND_MATH_USE_LEVELDB_CACHE "DB cache solutions" ON)
 set(BOOST_ADDITIONAL_COMPONENTS ${BOOST_ADDITIONAL_COMPONENTS};program_options CACHE VERSION "Boost components" FORCE)
 # Tell OpenMind to use any boost version installed in the system if any
@@ -35,7 +38,7 @@ FetchContent_Declare(openmind
 FetchContent_MakeAvailable(openmind)
 
 if(BUILD_TESTS OR OPENMIND_BUILD_TESTS)
-    enable_testing()    
+    enable_testing()
 endif(BUILD_TESTS OR OPENMIND_BUILD_TESTS)
 
 # OpenMind: traverse subprojects
