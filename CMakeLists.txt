@@ -1,8 +1,7 @@
 cmake_minimum_required (VERSION 3.8)
 
-# Select C++ active standard
 enable_language(CXX)
-set (CMAKE_CXX_STANDARD 20)
+set (CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -10,7 +9,9 @@ option(OPENMIND_DEBUG_CHECKS "Additional debug checks" OFF)
 find_package(OpenCL)
 option(OPENMIND_USE_OPENCL "OpenCL GPU calculations" ${OpenCL_FOUND})
 option(OPENMIND_MATH_USE_LEVELDB_CACHE "DB cache solutions" ON)
-set(BOOST_ADDITIONAL_COMPONENTS ${BOOST_ADDITIONAL_COMPONENTS};program_options CACHE VERSION "Boost components" FORCE)
+set(BOOST_ADDITIONAL_COMPONENTS ${BOOST_ADDITIONAL_COMPONENTS} program_options)
+list(REMOVE_DUPLICATES BOOST_ADDITIONAL_COMPONENTS)
+set(BOOST_ADDITIONAL_COMPONENTS ${BOOST_ADDITIONAL_COMPONENTS} CACHE VERSION "Boost components" FORCE)
 # Tell OpenMind to use any boost version installed in the system if any
 if(Boost_FOUND)
     set(OPENMIND_REQUIRED_BOOST_VERSION ${Boost_VERSION_STRING} CACHE VERSION "Boost library version to use" FORCE)
@@ -35,7 +36,7 @@ FetchContent_Declare(openmind
 FetchContent_MakeAvailable(openmind)
 
 if(BUILD_TESTS OR OPENMIND_BUILD_TESTS)
-    enable_testing()    
+    enable_testing()
 endif(BUILD_TESTS OR OPENMIND_BUILD_TESTS)
 
 # OpenMind: traverse subprojects

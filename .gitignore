@@ -43,3 +43,4 @@ CMakeSettings.json
 /enc_temp_folder/
 *Cache.solutions
 /.idea
+/cmake-build-*/

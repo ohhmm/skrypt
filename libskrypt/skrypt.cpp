@@ -155,7 +155,7 @@ namespace {
 
 void Skrypt::ProcessQuestionLine(std::string_view& line)
 {
-    Valuable::YesNoMaybe is = Valuable::YesNoMaybe::Maybe;
+    YesNoMaybe is = YesNoMaybe::Maybe;
     auto questionless = Questionless(line);
     if (questionless.empty()) {
         PrintAllKnowns();
@@ -173,29 +173,29 @@ void Skrypt::ProcessQuestionLine(std::string_view& line)
 
         if (expression.IsSimple() == constants::zero) {
             if (expression == constants::zero)
-                is = Valuable::YesNoMaybe::Yes;
+                is = YesNoMaybe::Yes;
             else if (expression.Distinct().contains(constants::zero)) {
                 std::cout << "potentially ";
-                is = Valuable::YesNoMaybe::Yes;
+                is = YesNoMaybe::Yes;
             }
 			else {
-				is = Valuable::YesNoMaybe::No;
+				is = YesNoMaybe::No;
 			}
         } else if (knowns.size()) {
 			expression.eval(knowns);
             expression.optimize();
             if (expression.IsInt()) {
                 if (expression == 0) {
-                    is = Valuable::YesNoMaybe::Yes;
+                    is = YesNoMaybe::Yes;
                 } else {
-                    is = Valuable::YesNoMaybe::No;
+                    is = YesNoMaybe::No;
                 }
             } else if (expression.IsSimple()) {
                 if (expression.Distinct().contains(constants::zero)) {
                     std::cout << "not neccessarily, but ";
-                    is = Valuable::YesNoMaybe::Yes;
+                    is = YesNoMaybe::Yes;
                 } else {
-                    is = Valuable::YesNoMaybe::No;
+                    is = YesNoMaybe::No;
                 }
             } else {
                 IMPLEMENT
@@ -218,13 +218,13 @@ void Skrypt::ProcessQuestionLine(std::string_view& line)
                         if (rest.IsSum()) {
                             auto restGrade = rest.as<Sum>().FillPolyCoeff(coefficients, va);
                             if (totalGrade == restGrade + lineGrade)
-                                is = Valuable::YesNoMaybe::Yes;
+                                is = YesNoMaybe::Yes;
                         }
                     } else if (expression.IsVa()) {
                         auto solutions = Solve(expression.as<Variable>());
                         if (solutions.size() == 1) {
                             if (solutions.cbegin()->operator==(0))
-                                is = Valuable::YesNoMaybe::Yes;
+                                is = YesNoMaybe::Yes;
                         }
                     }
                 } else {
@@ -232,19 +232,19 @@ void Skrypt::ProcessQuestionLine(std::string_view& line)
                 }
             } else if (total == constants::zero) {
             } else if (total.IsInt()) {
-                is = Valuable::YesNoMaybe::No;
+                is = YesNoMaybe::No;
             } else {
                 IMPLEMENT
             }
 		}
 		catch (...) {
-			is = Valuable::YesNoMaybe::Maybe;
+			is = YesNoMaybe::Maybe;
 		}
 
 		std::cout << '\n' << expression << " ?\n";
-        if (is == Valuable::YesNoMaybe::Yes)
+        if (is == YesNoMaybe::Yes)
             std::cout << "YES";
-        else if (is == Valuable::YesNoMaybe::No)
+        else if (is == YesNoMaybe::No)
             std::cout << "NO";
         else
             std::cout << "IDK";

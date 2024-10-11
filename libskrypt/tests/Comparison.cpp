@@ -1,4 +1,4 @@
-#define BOOST_TEST_MODULE comparison test
+#define BOOST_TEST_MODULE Comparison test
 #include <boost/test/unit_test.hpp>
 #include "skrypt.h"
 
