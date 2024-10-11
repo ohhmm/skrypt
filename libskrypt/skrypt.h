@@ -28,7 +28,7 @@ class Skrypt
 
     using module_t = std::shared_ptr<Skrypt>;
     using modules_t = std::map<std::string_view, module_t>;
-    using loading_module_t = std::future<module_t>;
+    using loading_module_t = std::shared_future<module_t>;
     using loading_modules_t = std::map<std::string_view, loading_module_t>;
     using loading_modules_future_t = std::future<loading_modules_t>;
 

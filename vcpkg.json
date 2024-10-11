@@ -1,0 +1,32 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "builtin-baseline": "3508985146f1b1d248c67ead13f8f54be5b4f5da",
+  "name": "skrypt",
+  "version": "1.0.0",
+  "description": "Sergii Kryvonos Relation Yarn Plausibility Tool",
+  "dependencies": [
+    "boost",
+    "boost-chrono",
+    "boost-compute",
+    "boost-date-time",
+    "boost-filesystem",
+    "boost-iostreams",
+    "boost-locale",
+    "boost-multiprecision",
+    "boost-program-options",
+    "boost-serialization",
+    "boost-system",
+    "boost-test",
+    "boost-thread",
+    "boost-uuid",
+    "leveldb",
+    {
+      "name": "vcpkg-cmake",
+      "host": true
+    },
+    {
+      "name": "vcpkg-cmake-config",
+      "host": true
+    }
+  ]
+}
