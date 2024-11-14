@@ -1,0 +1,12 @@
+diff --git a/omnn/math/Polyfit.h b/omnn/math/Polyfit.h
+index d84cd1e..d7de716 100644
+--- a/omnn/math/Polyfit.h
++++ b/omnn/math/Polyfit.h
+@@ -14,6 +14,7 @@
+ #include <vector>
+ #include <cmath>
+
++#include <boost/numeric/ublas/allocator_compat.hpp>
+ #include <boost/numeric/ublas/matrix.hpp>
+ #include <boost/numeric/ublas/lu.hpp>
+

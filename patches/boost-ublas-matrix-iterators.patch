@@ -1,0 +1,24 @@
+diff --git a/include/boost/numeric/ublas/matrix.hpp b/include/boost/numeric/ublas/matrix.hpp
+index 12345678..87654321 100644
+--- a/include/boost/numeric/ublas/matrix.hpp
++++ b/include/boost/numeric/ublas/matrix.hpp
+@@ -4057,7 +4057,8 @@ namespace boost { namespace numeric { namespace ublas {
+         class const_iterator1:
+             public container_const_reference<identity_matrix>,
+             public bidirectional_iterator_base<sparse_bidirectional_iterator_tag,
+-                                                const_iterator1, value_type> {
++                                               const_iterator1, value_type> {
++            size_type it_;
+         public:
+             typedef typename identity_matrix::value_type value_type;
+             typedef typename identity_matrix::difference_type difference_type;
+@@ -4219,7 +4220,8 @@ namespace boost { namespace numeric { namespace ublas {
+         class const_iterator2:
+             public container_const_reference<identity_matrix>,
+             public bidirectional_iterator_base<sparse_bidirectional_iterator_tag,
+-                                                const_iterator2, value_type> {
++                                               const_iterator2, value_type> {
++            size_type it_;
+         public:
+             typedef typename identity_matrix::value_type value_type;
+             typedef typename identity_matrix::difference_type difference_type;

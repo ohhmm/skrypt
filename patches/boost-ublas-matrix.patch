@@ -1,0 +1,31 @@
+diff --git a/include/boost/numeric/ublas/matrix.hpp b/include/boost/numeric/ublas/matrix.hpp
+index 12345678..87654321 100644
+--- a/include/boost/numeric/ublas/matrix.hpp
++++ b/include/boost/numeric/ublas/matrix.hpp
+@@ -3972,6 +3972,10 @@ namespace boost { namespace numeric { namespace ublas {
+     class identity_matrix:
+         public matrix_container<identity_matrix<T, ALLOC> > {
+     private:
++        size_type size1_;
++        size_type size2_;
++        size_type size_common_;
++
+     public:
+         typedef size_type size_type;
+         typedef std::ptrdiff_t difference_type;
+@@ -4069,6 +4073,7 @@ namespace boost { namespace numeric { namespace ublas {
+             typedef const_iterator1 class_type;
+         public:
+             typedef typename identity_matrix::difference_type difference_type;
++            size_type it_;
+             typedef typename identity_matrix::value_type value_type;
+             typedef typename identity_matrix::const_reference reference;
+             typedef typename identity_matrix::const_pointer pointer;
+@@ -4217,6 +4222,7 @@ namespace boost { namespace numeric { namespace ublas {
+             typedef const_iterator2 class_type;
+         public:
+             typedef typename identity_matrix::difference_type difference_type;
++            size_type it_;
+             typedef typename identity_matrix::value_type value_type;
+             typedef typename identity_matrix::const_reference reference;
+             typedef typename identity_matrix::const_pointer pointer;
