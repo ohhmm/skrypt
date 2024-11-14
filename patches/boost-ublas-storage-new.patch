@@ -1,0 +1,35 @@
+--- storage.hpp.orig	2024-03-11 19:28:32.000000000 +0000
++++ storage.hpp	2024-03-11 19:28:32.000000000 +0000
+@@ -78,7 +78,7 @@
+                   for (pointer d = data_; d != data_ + size_; ++d)
+-                      alloc_.construct(d, value_type());
++                      std::allocator_traits<ALLOC>::construct(alloc_, d);
+               }
+
+@@ -151,12 +151,12 @@
+                             for (; di != data_ + size; ++di) {
+-                                alloc_.construct (di, *si);
++                                std::allocator_traits<ALLOC>::construct(alloc_, di, *si);
+                                 ++si;
+                             }
+                             for (; si != p_data + size_; ++si) {
+-                                alloc_.construct (di, *si);
++                                std::allocator_traits<ALLOC>::construct(alloc_, di, *si);
+                                 ++di;
+                             }
+                             for (; di != data_ + size; ++di) {
+-                                alloc_.construct (di, init);
++                                std::allocator_traits<ALLOC>::construct(alloc_, di, init);
+                             }
+
+@@ -176,7 +176,7 @@
+                            for (pointer di = data_; di != data_ + size; ++di)
+-                                alloc_.construct (di, value_type());
++                                std::allocator_traits<ALLOC>::construct(alloc_, di);
+                         }
+
+@@ -192,7 +192,7 @@
+                         for (pointer si = p_data; si != p_data + size_; ++si)
+-                            alloc_.destroy (si);
++                            std::allocator_traits<ALLOC>::destroy(alloc_, si);
+                     }

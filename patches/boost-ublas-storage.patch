@@ -1,0 +1,40 @@
+--- storage.hpp.orig	2024-03-11 19:28:32.000000000 +0000
++++ storage.hpp	2024-03-11 19:28:32.000000000 +0000
+@@ -76,7 +76,7 @@
+             if (size_) {
+                 data_ = alloc_.allocate(size_);
+                 if (!detail::has_trivial_constructor<T>::value)
+-                    for (pointer d = data_; d < data_ + size_; ++ d)
+-                        alloc_.construct(d, value_type());
++                    for (pointer d = data_; d < data_ + size_; ++d)
++                        std::allocator_traits<ALLOC>::construct(alloc_, d);
+             }
+         }
+
+@@ -84,7 +84,7 @@
+             if (size_) {
+                 data_ = alloc_.allocate(size_);
+                 for (pointer d = data_; d < data_ + size_; ++ d)
+-                    alloc_.construct(d, init);
++                    std::allocator_traits<ALLOC>::construct(alloc_, d, init);
+             }
+         }
+
+@@ -92,7 +92,7 @@
+             if (data_) {
+                 if (!detail::has_trivial_destructor<T>::value)
+                     for (pointer d = data_; d < data_ + size_; ++ d)
+-                        alloc_.destroy(d);
++                        std::allocator_traits<ALLOC>::destroy(alloc_, d);
+                 alloc_.deallocate(data_, size_);
+             }
+         }
+@@ -116,7 +116,7 @@
+                 pointer new_data = (size != 0) ? alloc_.allocate(size) : 0;
+                 if (!detail::has_trivial_constructor<T>::value && size != 0)
+                     for (pointer d = new_data; d < new_data + size; ++ d)
+-                        alloc_.construct(d, value_type());
++                        std::allocator_traits<ALLOC>::construct(alloc_, d);
+                 if (data_) {
+                     std::copy(data_, data_ + (std::min)(size_, size), new_data);
+                     if (!detail::has_trivial_destructor<T>::value)
