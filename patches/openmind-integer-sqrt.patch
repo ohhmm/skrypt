@@ -1,0 +1,14 @@
+diff --git a/omnn/math/Integer.cpp b/omnn/math/Integer.cpp
+index d84cd1e..d7de716 100644
+--- a/omnn/math/Integer.cpp
++++ b/omnn/math/Integer.cpp
+@@ -640,7 +640,8 @@ class Integer {
+     Valuable Integer::Sqrt() const
+     {
+         auto arbitraryAbsoluteValue = boost::multiprecision::abs(arbitrary);
+-        auto sqrtIntegerPart = boost::multiprecision::sqrt(arbitraryAbsoluteValue); // integer square root
++        auto evaluatedValue = arbitraryAbsoluteValue.template convert_to<boost::multiprecision::cpp_int>();
++        auto sqrtIntegerPart = boost::multiprecision::sqrt(evaluatedValue); // integer square root
+         if (sqrtIntegerPart * sqrtIntegerPart != arbitraryAbsoluteValue) { // no integer square root
+             auto d = GreatestCommonExp(constants::two);
+             if (d.second != constants::one) {
