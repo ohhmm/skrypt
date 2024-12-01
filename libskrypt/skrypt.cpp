@@ -112,32 +112,51 @@ void Skrypt::PrintAllKnowns()
     }
 }
 
-bool Skrypt::Add(std::string_view line) {
-	Valuable v(line, varHost);
-    BackgroudLoadingModules(v);
-	v.CollectVaNames(vars);
+void Skrypt::BindTargetStream(std::ostream& o) {
+    outputs.emplace_back(&o, [](auto){});
+}
+
+void Skrypt::BindTargetStream(std::shared_ptr<std::ostream> o) {
+    outputs.emplace_back(std::move(o));
+}
+
+void Skrypt::BindTargetStream(const boost::filesystem::path& filepath){
+    BindTargetStream(std::make_shared<boost::filesystem::ofstream>(filepath));
+}
+
+bool Skrypt::Add(Valuable&& v) {
+    BackgroundLoadingModules(v);
+    v.CollectVaNames(vars);
     bool ok = {};
     try
     {
         if (v.IsVa()) {
-			PrintVarKnowns(v.as<Variable>());
+            PrintVarKnowns(v.as<Variable>());
             ok = true;
+        } else {
+            if(echo)
+                std::cout << v << std::endl;
+            if (ok && outputs.size()) {
+                for (auto& o : outputs) {
+                    *o << v << std::endl;
+                }
+            }
+            if (DisjunctionParseMode())
+                ok = disjunction.Add(std::move(v)) != disjunction.end();
+            else
+                ok = base::Add(std::move(v));
         }
-        else {
-            std::cout << v << std::endl;
-			if(DisjunctionParseMode())
-				ok = disjunction.Add(v) != disjunction.end();
-			else
-				ok = base::Add(std::move(v));
-        }
-    }
-    catch(...)
-    {
-        if (!ok) {
+    } catch (...) {
+        if (echo && !ok) {
             std::cout << "Please, consider additional defining to the system to make this request" << std::endl;
         }
     }
-	return ok;
+    return ok;
+}
+
+bool Skrypt::Add(std::string_view line) {
+	Valuable v(line, varHost);
+    return Add(v);
 }
 
 namespace {
@@ -534,7 +553,7 @@ Skrypt::loading_modules_future_t Skrypt::StartLoadingModules(const Valuable& v) 
     return std::async(std::launch::async, &Skrypt::LoadModules, this, v);
 }
 
-void Skrypt::BackgroudLoadingModules(const ::omnn::math::Valuable& v) {
+void Skrypt::BackgroundLoadingModules(const ::omnn::math::Valuable& v) {
     modulesLoadingQueue.AddTask(&Skrypt::LoadModules, this, v);
 }
 

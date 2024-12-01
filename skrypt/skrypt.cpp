@@ -18,12 +18,21 @@ using namespace omnn::math;
 
 namespace {
 	bool IsInteractiveMode = true;
+	bool Echo = true;
     boost::program_options::options_description Options("Options");
     std::vector<boost::filesystem::path> filepath;
+    std::vector<boost::filesystem::path> outputs;
+	std::vector<boost::filesystem::path> genCppPath;
+	std::vector<boost::filesystem::path> saveSystemPath;
     auto& desc = Options.add_options()
 		("help", "produce help message")
-		("file", boost::program_options::value(&filepath), "Load task description")
-		("i,interactive", boost::program_options::value(&IsInteractiveMode)->default_value(true), "Continue interactive mode after loading scripts")
+		("echo", boost::program_options::value(&Echo)->default_value(Echo), "Load file/pipe path or 'stdin'")
+		("load,file", boost::program_options::value(&filepath), "Load file/pipe path or 'stdin'")
+		("o,output", boost::program_options::value(&outputs), "Output file/pipe path or 'stdout'")
+		("i,interactive,stdin", boost::program_options::value(&IsInteractiveMode)->default_value(true), "Continue interactive mode after loading scripts")
+		("gen-opencl-kernel", boost::program_options::value(&genCppPath), "Generate OpenCL compute kernel code")
+		("gen-cpp", boost::program_options::value(&genCppPath), "Generate C++ code")
+		("save-system", boost::program_options::value(&saveSystemPath), "Save system binary file/pipe paths or 'stdout'")
 		;
     boost::program_options::variables_map vm;
 }
@@ -44,7 +53,15 @@ int main(int argc, const char* const argv[])
     if (argc > 1)
     {
         skrypt::Skrypt s;
-        s.Echo(true);
+        for (auto& o : outputs) {
+            if (o == "stdout") {
+                Echo = {};
+                s.BindTargetStream(std::cout);
+            } else {
+                s.BindTargetStream(o);
+            }
+        }
+        s.Echo(Echo || IsInteractiveMode);
 		//s.MakesTotalEqu(true);
 		if (filepath.size() == 0 && argc == 2) {
 			filepath.push_back(argv[1]);
