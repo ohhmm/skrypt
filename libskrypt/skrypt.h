@@ -6,7 +6,9 @@
 #include <boost/typeof/typeof.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
+#include <boost/log/sinks.hpp>
 
+#include <ostream>
 #include <map>
 #include <shared_mutex>
 #include <string_view>
@@ -39,6 +41,7 @@ class Skrypt
     ::omnn::rt::StoringTasksQueue<loading_modules_t> modulesLoadingQueue;
     path sourceFilePath;
     std::vector<path> moduleFileSearchAdditionalPaths;
+    std::vector<std::shared_ptr<std::ostream>> outputs;
 
 protected:
     void SetVarhost(decltype(varHost));
@@ -60,11 +63,16 @@ public:
 
     using base::Add;
 
+    bool Add(::omnn::math::Valuable&&);
     bool Add(std::string_view);
     bool ParseNextLine(std::istream&, std::string_view&);
     void PrintVarKnowns(const omnn::math::Variable&);
     void PrintAllKnowns();
     void ProcessQuestionLine(std::string_view&);
+
+    void BindTargetStream(std::ostream&);
+    void BindTargetStream(std::shared_ptr<std::ostream>);
+    void BindTargetStream(const boost::filesystem::path&);
 
     /// <summary>
     /// Loads .skrypt file and returns InitialVarNames for input
@@ -97,7 +105,7 @@ public:
     loading_module_t StartLoadingModule(std::string_view name);
     loading_modules_t LoadModules(const ::omnn::math::Valuable& v);
     loading_modules_future_t StartLoadingModules(const ::omnn::math::Valuable& v);
-    void BackgroudLoadingModules(const ::omnn::math::Valuable& v);
+    void BackgroundLoadingModules(const ::omnn::math::Valuable& v);
 
     /// <summary>
     /// Wait for the module to be loaded
