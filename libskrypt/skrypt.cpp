@@ -180,28 +180,28 @@ void Skrypt::ProcessQuestionLine(std::string_view& line)
         PrintAllKnowns();
     }
 	else {
-		Valuable expression(questionless, varHost);
-		auto lineVars = expression.Vars();
+        Valuable expression(questionless, varHost);
+        auto lineVars = expression.Vars();
         Valuable::vars_cont_t knowns;
-		for (auto& v : lineVars) {
+        for (auto& v : lineVars) {
             auto& known = Known(v);
-			if (known.size() == 1) {
+            if (known.size() == 1) {
                 knowns.emplace(v, *known.begin());
-			}
-		}
+            }
+        }
 
-        if (expression.IsSimple() == constants::zero) {
-            if (expression == constants::zero)
+        if (expression.IsSimple()) {
+            if (expression.IsZero()) {
                 is = YesNoMaybe::Yes;
-            else if (expression.Distinct().contains(constants::zero)) {
+            } else if (expression.Distinct().contains(constants::zero)) {
                 std::cout << "potentially ";
                 is = YesNoMaybe::Yes;
             }
 			else {
-				is = YesNoMaybe::No;
-			}
+                is = YesNoMaybe::No;
+            }
         } else if (knowns.size()) {
-			expression.eval(knowns);
+            expression.eval(knowns);
             expression.optimize();
             if (expression.IsInt()) {
                 if (expression == 0) {
@@ -219,48 +219,48 @@ void Skrypt::ProcessQuestionLine(std::string_view& line)
             } else {
                 IMPLEMENT
             }
-        } else try {
-            const auto total = MakesTotalEqu() ? Total().Link() : CalculateTotalExpression();
-            if (total.IsSum()) {
-                auto rest = total / expression;
-                std::cout << "Total: " << total << std::endl
-                          << total << " / " << expression << ": " << rest << std::endl;
-                auto& totalSum = total.as<Sum>();
-                if (lineVars.size() == 1) {
-                    std::vector<Valuable> coefficients;
-                    auto& va = *lineVars.begin();
-                    auto totalGrade = totalSum.FillPolyCoeff(coefficients, va);
-                    coefficients.clear();
-                    if (expression.IsSum()) {
-                        auto& lineSum = expression.as<Sum>();
-                        auto lineGrade = lineSum.FillPolyCoeff(coefficients, va);
-                        if (rest.IsSum()) {
-                            auto restGrade = rest.as<Sum>().FillPolyCoeff(coefficients, va);
-                            if (totalGrade == restGrade + lineGrade)
-                                is = YesNoMaybe::Yes;
+        } else
+            try {
+                const auto total = MakesTotalEqu() ? Total().Link() : CalculateTotalExpression();
+                if (total.IsSum()) {
+                    auto rest = total / expression;
+                    std::cout << "Total: " << total << std::endl
+                              << total << " / " << expression << ": " << rest << std::endl;
+                    auto& totalSum = total.as<Sum>();
+                    if (lineVars.size() == 1) {
+                        std::vector<Valuable> coefficients;
+                        auto& va = *lineVars.begin();
+                        auto totalGrade = totalSum.FillPolyCoeff(coefficients, va);
+                        coefficients.clear();
+                        if (expression.IsSum()) {
+                            auto& lineSum = expression.as<Sum>();
+                            auto lineGrade = lineSum.FillPolyCoeff(coefficients, va);
+                            if (rest.IsSum()) {
+                                auto restGrade = rest.as<Sum>().FillPolyCoeff(coefficients, va);
+                                if (totalGrade == restGrade + lineGrade)
+                                    is = YesNoMaybe::Yes;
+                            }
+                        } else if (expression.IsVa()) {
+                            auto solutions = Solve(expression.as<Variable>());
+                            if (solutions.size() == 1) {
+                                if (solutions.cbegin()->operator==(0))
+                                    is = YesNoMaybe::Yes;
+                            }
                         }
-                    } else if (expression.IsVa()) {
-                        auto solutions = Solve(expression.as<Variable>());
-                        if (solutions.size() == 1) {
-                            if (solutions.cbegin()->operator==(0))
-                                is = YesNoMaybe::Yes;
-                        }
+                    } else {
+                        IMPLEMENT
                     }
+                } else if (total == constants::zero) {
+                } else if (total.IsInt()) {
+                    is = YesNoMaybe::No;
                 } else {
                     IMPLEMENT
                 }
-            } else if (total == constants::zero) {
-            } else if (total.IsInt()) {
-                is = YesNoMaybe::No;
-            } else {
-                IMPLEMENT
+            } catch (...) {
+                is = YesNoMaybe::Maybe;
             }
-		}
-		catch (...) {
-			is = YesNoMaybe::Maybe;
-		}
 
-		std::cout << '\n' << expression << " ?\n";
+        std::cout << '\n' << expression << " ?\n";
         if (is == YesNoMaybe::Yes)
             std::cout << "YES";
         else if (is == YesNoMaybe::No)
@@ -268,7 +268,7 @@ void Skrypt::ProcessQuestionLine(std::string_view& line)
         else
             std::cout << "IDK";
         std::cout << std::endl;
-	}
+    }
 }
 
 bool Skrypt::ParseNextLine(std::istream& in, std::string_view& line) {
@@ -337,7 +337,12 @@ bool Skrypt::ParseNextLine(std::istream& in, std::string_view& line) {
 			ProcessQuestionLine(line);
 		}
 		else {
-			Add(line);
+            Valuable v(line, varHost);
+            if (v.IsSimple()) {
+                std::cout << v << std::endl;
+            } else {
+                Add(std::move(v));
+            }
 		}
 		line = {};
 	}
