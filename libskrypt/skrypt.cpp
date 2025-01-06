@@ -181,6 +181,7 @@ void Skrypt::ProcessQuestionLine(std::string_view& line)
     }
 	else {
         Valuable expression(questionless, varHost);
+        expression.SetView(Valuable::View::Equation);
         auto lineVars = expression.Vars();
         Valuable::vars_cont_t knowns;
         for (auto& v : lineVars) {
@@ -204,7 +205,7 @@ void Skrypt::ProcessQuestionLine(std::string_view& line)
             expression.eval(knowns);
             expression.optimize();
             if (expression.IsInt()) {
-                if (expression == 0) {
+                if (expression.IsZero()) {
                     is = YesNoMaybe::Yes;
                 } else {
                     is = YesNoMaybe::No;
@@ -217,7 +218,7 @@ void Skrypt::ProcessQuestionLine(std::string_view& line)
                     is = YesNoMaybe::No;
                 }
             } else {
-                IMPLEMENT
+                LOG_AND_IMPLEMENT(expression);
             }
         } else
             try {
@@ -228,29 +229,29 @@ void Skrypt::ProcessQuestionLine(std::string_view& line)
                               << total << " / " << expression << ": " << rest << std::endl;
                     auto& totalSum = total.as<Sum>();
                     if (lineVars.size() == 1) {
-                        std::vector<Valuable> coefficients;
                         auto& va = *lineVars.begin();
-                        auto totalGrade = totalSum.FillPolyCoeff(coefficients, va);
+                        std::vector<Valuable> coefficients;
+                        auto totalGrade = totalSum.FillPolynomialCoefficients(coefficients, va);
                         coefficients.clear();
                         if (expression.IsSum()) {
                             auto& lineSum = expression.as<Sum>();
-                            auto lineGrade = lineSum.FillPolyCoeff(coefficients, va);
+                            auto lineGrade = lineSum.FillPolynomialCoefficients(coefficients, va);
                             if (rest.IsSum()) {
-                                auto restGrade = rest.as<Sum>().FillPolyCoeff(coefficients, va);
+                                auto restGrade = rest.as<Sum>().FillPolynomialCoefficients(coefficients, va);
                                 if (totalGrade == restGrade + lineGrade)
                                     is = YesNoMaybe::Yes;
                             }
                         } else if (expression.IsVa()) {
                             auto solutions = Solve(expression.as<Variable>());
                             if (solutions.size() == 1) {
-                                if (solutions.cbegin()->operator==(0))
+                                if (solutions.cbegin()->IsZero())
                                     is = YesNoMaybe::Yes;
                             }
                         }
                     } else {
                         IMPLEMENT
                     }
-                } else if (total == constants::zero) {
+                } else if (total.IsZero()) {
                 } else if (total.IsInt()) {
                     is = YesNoMaybe::No;
                 } else {
@@ -337,11 +338,18 @@ bool Skrypt::ParseNextLine(std::istream& in, std::string_view& line) {
 			ProcessQuestionLine(line);
 		}
 		else {
-            Valuable v(line, varHost);
-            if (v.IsSimple()) {
-                std::cout << v << std::endl;
+            Valuable expression;
+            try {
+                expression = Valuable(line, varHost);
+            } catch (std::runtime_error error) {
+                std::cout << "Expression parsing error: " << error.what() << std::endl;
+            } catch (...) {
+                std::cout << "Expression parsing error." << std::endl;
+            }
+            if (expression.IsSimple()) {
+                std::cout << expression << std::endl;
             } else {
-                Add(std::move(v));
+                Add(std::move(expression));
             }
 		}
 		line = {};
