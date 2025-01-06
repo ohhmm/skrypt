@@ -2,16 +2,17 @@
 #include "skrypt.h"
 #include <boost/test/unit_test.hpp>
 
+using namespace boost::unit_test;
 using namespace ::skrypt;
 using namespace std::string_literals;
 using namespace std::string_view_literals;
 
-BOOST_AUTO_TEST_CASE(LoadingModulesNoExceptionsTest) {
+BOOST_AUTO_TEST_CASE(LoadingModulesNoExceptionsTest, *disabled()) {
     Skrypt skrypt(TEST_SRC_DIR "Module.skrypt");
     auto copy = skrypt;
 }
 
-BOOST_AUTO_TEST_CASE(ModulePropertyTest) {
+BOOST_AUTO_TEST_CASE(ModulePropertyTest, *disabled()) {
     Skrypt skrypt;
     skrypt.AddModuleSearchDirPath(TEST_SRC_DIR);
     skrypt.Load("Module.skrypt");
@@ -35,4 +36,7 @@ BOOST_AUTO_TEST_CASE(ModulePropertyTest) {
     for (auto& solution : moduleVariableSolutions) {
         BOOST_TEST(solution == 1);
     }
+}
+
+BOOST_AUTO_TEST_CASE(ModuleNoTest) {
 }

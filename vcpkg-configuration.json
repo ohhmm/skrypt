@@ -4,9 +4,6 @@
     "kind": "git",
     "baseline": "c82f74667287d3dc386bce81e44964370c91a289",
     "repository": "https://github.com/ohhmm/vcpkg",
-    "reference": "openmind-port",
-    "packages": [
-      "openmind"
-    ]
+    "reference": "openmind-port"
   }
 }

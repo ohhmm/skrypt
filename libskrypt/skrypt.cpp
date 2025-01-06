@@ -32,7 +32,7 @@ void Skrypt::SetVarhost(decltype(varHost) host)
 	}
 }
 
-bool skrypt::Skrypt::ParseTotal(std::istream& in, std::string_view& line, std::function<void(::omnn::math::Valuable&&)> result)
+bool Skrypt::ParseTotal(std::istream& in, std::string_view& line, std::function<void(Valuable&&)> result)
 {
 	MakesTotalEqu(true);
 	auto parsingIsOnTheGo = ParseNextLine(in, line);
@@ -47,7 +47,7 @@ bool skrypt::Skrypt::ParseTotal(std::istream& in, std::string_view& line, std::f
 	return parsingIsOnTheGo;
 }
 
-const ::omnn::math::Variable& Skrypt::MappedModuleVariable(const ::omnn::math::Variable& v, module_t module) {
+const Variable& Skrypt::MappedModuleVariable(const Variable& v, module_t module) {
     auto name = GetVariableName(v);
     auto moduleName = GetModuleName(name);
     if (!moduleName.empty()) {
@@ -272,72 +272,67 @@ void Skrypt::ProcessQuestionLine(std::string_view& line)
     }
 }
 
-bool Skrypt::ParseNextLine(std::istream& in, std::string_view& line) {
-	if (!line.empty()) {
-		auto bracePos = FindBracePos(line);
-		auto brace = bracePos == std::string_view::npos ? 0 : line[bracePos];
-		line.remove_prefix(bracePos+1);
-		switch (brace)
-		{
-		case '{': {
-			if (disjunctionParseMode) {
-				Skrypt subscript;
-				subscript.SetVarhost(GetVarHost());
-				subscript.Echo(echo);
-				return subscript.ParseTotal(in, line,
-					[this](::omnn::math::Valuable&& result) {
-						Add(std::move(result));
-					});
-			}
-			else if (Expressions().empty()) {
-				if (line.empty())
-					return true;
-				else
-					break;
-			}
-			else {
-				LOG_AND_IMPLEMENT("No need for double conjunction");
-			}
-		}
-		case '}': {
-			if (disjunctionParseMode) {
-				LOG_AND_IMPLEMENT("Closing disjunction with conjunction brace");
-			}
-			return {};
-		}
-		case '[': {
-			if (disjunctionParseMode) {
-				LOG_AND_IMPLEMENT("No need for double disjunction");
-			}
-			Skrypt subscript;
-			subscript.SetVarhost(GetVarHost());
-			subscript.Echo(echo);
-			subscript.DisjunctionParseMode(true);
-			return subscript.ParseTotal(in, line,
-				[this](::omnn::math::Valuable&& result) {
-					Add(std::move(result));
-				});
-		}
-		case ']': {
-			if (DisjunctionParseMode()) {
-				Add(std::move(disjunction));
-			}else {
-				LOG_AND_IMPLEMENT("Closing conjunction with disjunction brace");
-			}
-			return {};
-		}
-		case 0: {
-			break;
-		}
-		default: {
-			IMPLEMENT;
-		}
-		}
+bool Skrypt::ParseNextLine(std::istream& in, std::string_view& line)
+{
+    auto comment = line.find_first_of('#');
+    if (comment != std::string_view::npos)
+        line.remove_suffix(comment);
+    if (!line.empty()) {
+        auto bracePos = FindBracePos(line);
+        auto brace = bracePos == std::string_view::npos ? 0 : line[bracePos];
+        line.remove_prefix(bracePos + 1);
+        switch (brace) {
+        case '{': {
+            if (disjunctionParseMode) {
+                Skrypt subscript;
+                subscript.SetVarhost(GetVarHost());
+                subscript.Echo(echo);
+                return subscript.ParseTotal(in, line,
+                                            [this](::omnn::math::Valuable&& result) { Add(std::move(result)); });
+            } else if (Expressions().empty()) {
+                if (line.empty())
+                    return true;
+                else
+                    break;
+            } else {
+                LOG_AND_IMPLEMENT("No need for double conjunction");
+            }
+        }
+        case '}': {
+            if (disjunctionParseMode) {
+                LOG_AND_IMPLEMENT("Closing disjunction with conjunction brace");
+            }
+            return {};
+        }
+        case '[': {
+            if (disjunctionParseMode) {
+                LOG_AND_IMPLEMENT("No need for double disjunction");
+            }
+            Skrypt subscript;
+            subscript.SetVarhost(GetVarHost());
+            subscript.Echo(echo);
+            subscript.DisjunctionParseMode(true);
+            return subscript.ParseTotal(in, line, [this](::omnn::math::Valuable&& result) { Add(std::move(result)); });
+        }
+        case ']': {
+            if (DisjunctionParseMode()) {
+                Add(std::move(disjunction));
+            } else {
+                LOG_AND_IMPLEMENT("Closing conjunction with disjunction brace");
+            }
+            return {};
+        }
+        case 0: {
+            break;
+        }
+        default: {
+            IMPLEMENT;
+        }
+        }
 
-		if (boost::algorithm::contains(line, "?")) {
-			ProcessQuestionLine(line);
-		}
-		else {
+        if (boost::algorithm::contains(line, "?")) {
+            ProcessQuestionLine(line);
+        } else {
             Valuable expression;
             try {
                 expression = Valuable(line, varHost);
@@ -351,13 +346,13 @@ bool Skrypt::ParseNextLine(std::istream& in, std::string_view& line) {
             } else {
                 Add(std::move(expression));
             }
-		}
-		line = {};
-	}
-	return true;
+        }
+        line = {};
+    }
+    return true;
 }
 
-const omnn::math::Valuable::va_names_t& Skrypt::Load(std::istream& in)
+const Valuable::va_names_t& Skrypt::Load(std::istream& in)
 {
 	std::string line;
 	while (std::getline(in, line)) {
@@ -374,7 +369,7 @@ const omnn::math::Valuable::va_names_t& Skrypt::Load(std::istream& in)
 	return vars;
 }
 
-const omnn::math::Valuable::va_names_t& Skrypt::Load(const boost::filesystem::path & path)
+const Valuable::va_names_t& Skrypt::Load(const boost::filesystem::path & path)
 {
 	std::cout << "Loading " << path << '\n' << std::endl;
     auto filepath = boost::filesystem::exists(path)
@@ -622,7 +617,7 @@ Skrypt::module_t Skrypt::WaitTillModuleLoadingComplete(std::string_view name) {
     return Module(name);
 }
 
-const ::omnn::math::Valuable::solutions_t& Skrypt::Known(const ::omnn::math::Variable& v)
+const Valuable::solutions_t& Skrypt::Known(const Variable& v)
 {
 	auto known = std::cref(base::Known(v));
     if (known.get().size() == 0) {
