@@ -36,6 +36,7 @@ FetchContent_Declare(openmind
 FetchContent_MakeAvailable(openmind)
 
 if(BUILD_TESTS OR OPENMIND_BUILD_TESTS)
+    add_definitions(-DBOOST_TEST_DYN_LINK)
     enable_testing()
 endif(BUILD_TESTS OR OPENMIND_BUILD_TESTS)
 
