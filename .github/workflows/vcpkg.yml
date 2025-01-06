@@ -62,7 +62,7 @@ jobs:
         vcpkgJsonGlob: '**/vcpkg.json'
 
     - name: Configure CMake
-      run: cmake -B ${{github.workspace}}/build -G Ninja -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake -DOPENMIND_BUILD_TESTS=OFF || cmake -B ${{github.workspace}}/build -G Ninja -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake -DOPENMIND_BUILD_TESTS=OFF
+      run: cmake -B ${{github.workspace}}/build -G Ninja -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake -DOPENMIND_BUILD_TESTS=ON || cmake -B ${{github.workspace}}/build -G Ninja -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake -DOPENMIND_BUILD_TESTS=ON
 
     - name: Build
       run: cmake --build ${{github.workspace}}/build
