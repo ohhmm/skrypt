@@ -8,7 +8,6 @@ using namespace omnn::math;
 #include <boost/serialization/vector.hpp>
 #include <boost/program_options.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
-#include <boost/lambda2.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/archive/binary_oarchive.hpp>
 

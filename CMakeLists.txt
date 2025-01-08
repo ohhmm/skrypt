@@ -1,5 +1,9 @@
 cmake_minimum_required (VERSION 3.8)
 
+project(skrypt)
+
+set(OPENMIND_USE_VCPKG ON)
+
 enable_language(CXX)
 set (CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -34,6 +38,12 @@ FetchContent_Declare(openmind
     GIT_REPOSITORY https://github.com/ohhmm/openmind.git
     GIT_TAG main)
 FetchContent_MakeAvailable(openmind)
+
+# Add openmind's cmake modules to the module path
+list(APPEND CMAKE_MODULE_PATH
+  "${CMAKE_BINARY_DIR}/_deps/openmind-src/cmake"
+  "${CMAKE_BINARY_DIR}/_deps/openmind-src/cmake/Modules"
+)
 
 if(BUILD_TESTS OR OPENMIND_BUILD_TESTS)
     enable_testing()
