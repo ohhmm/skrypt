@@ -11,11 +11,14 @@
     "boost-date-time",
     "boost-dll",
     "boost-filesystem",
+    "boost-gil",
     "boost-iostreams",
+    "boost-lambda",
     "boost-locale",
     "boost-multiprecision",
     "boost-program-options",
     "boost-python",
+    "boost-rational",
     "boost-serialization",
     "boost-system",
     "boost-test",
@@ -24,6 +27,7 @@
     "boost-uuid",
     "leveldb",
     "liblzma",
+    "tbb",
     {
       "name": "vcpkg-cmake",
       "host": true
