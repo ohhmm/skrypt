@@ -22,9 +22,11 @@ jobs:
           !${{github.workspace}}/vcpkg/buildtrees
           !${{github.workspace}}/vcpkg/packages
           !${{github.workspace}}/vcpkg/downloads
+          ${{ github.workspace }}/build/vcpkg_installed
           ${{ github.workspace }}/build/bin/Db*.solutions
-        key: ${{ runner.os }}-vcpkg-${{ hashFiles('**/vcpkg.json') }}
+        key: ${{ runner.os }}-vcpkg-${{ hashFiles('**/vcpkg.json', '**/vcpkg-configuration.json') }}-v1
         restore-keys: |
+          ${{ runner.os }}-vcpkg-${{ hashFiles('**/vcpkg.json', '**/vcpkg-configuration.json') }}-
           ${{ runner.os }}-vcpkg-
 
     - name: Install dependencies (Ubuntu)
