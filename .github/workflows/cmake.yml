@@ -30,3 +30,12 @@ jobs:
     - name: Check
       working-directory: ${{github.workspace}}/build
       run: ctest . -j`nproc` -C ${{env.BUILD_TYPE}} --test-dir libskrypt --rerun-failed --output-on-failure
+      
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: skrypt-cmake-build
+        path: |
+          ${{github.workspace}}/build/bin
+          ${{github.workspace}}/build/lib
+        retention-days: 7
