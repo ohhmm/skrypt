@@ -83,3 +83,14 @@ jobs:
     - name: Check
       working-directory: ${{github.workspace}}/build
       run: ctest . -C ${{ matrix.config }} -j ${{steps.cpu-cores.outputs.count}} --test-dir libskrypt --rerun-failed --output-on-failure
+      
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: skrypt-vcpkg-${{ runner.os }}-${{ matrix.config }}
+        path: |
+          ${{github.workspace}}/build/bin
+          ${{github.workspace}}/build/lib
+          ${{github.workspace}}/install/bin
+          ${{github.workspace}}/install/lib
+        retention-days: 7
