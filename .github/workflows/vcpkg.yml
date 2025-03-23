@@ -7,7 +7,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
         config: [Release]
     runs-on: ${{ matrix.os }}
 
@@ -67,8 +67,13 @@ jobs:
         vcpkgGitCommitId: 'c82f74667287d3dc386bce81e44964370c91a289'
         vcpkgJsonGlob: '**/vcpkg.json'
 
-    - name: Configure CMake
+    - name: Configure CMake (non-Windows)
+      if: runner.os != 'Windows'
       run: cmake -B ${{github.workspace}}/build -G "Ninja Multi-Config" -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake ${{ env.VCPKG_TARGET_TRIPLET_CMAKE_PARAM }} -DOPENMIND_BUILD_TESTS=ON -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/install
+      
+    - name: Configure CMake (Windows)
+      if: runner.os == 'Windows'
+      run: cmake -B ${{github.workspace}}/build -G "Ninja Multi-Config" -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake ${{ env.VCPKG_TARGET_TRIPLET_CMAKE_PARAM }} -DOPENMIND_BUILD_TESTS=NO -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/install
 
     - name: Build
       run: cmake --build ${{github.workspace}}/build --config ${{ matrix.config }}
@@ -80,7 +85,8 @@ jobs:
       uses: SimenB/github-actions-cpu-cores@v2
       id: cpu-cores
 
-    - name: Check
+    - name: Check (non-Windows)
+      if: runner.os != 'Windows'
       working-directory: ${{github.workspace}}/build
       run: ctest . -C ${{ matrix.config }} -j ${{steps.cpu-cores.outputs.count}} --test-dir libskrypt --rerun-failed --output-on-failure
       
@@ -93,4 +99,8 @@ jobs:
           ${{github.workspace}}/build/lib
           ${{github.workspace}}/install/bin
           ${{github.workspace}}/install/lib
+          ${{github.workspace}}/build/${{ matrix.config }}/bin
+          ${{github.workspace}}/build/${{ matrix.config }}/lib
+          ${{github.workspace}}/install/bin/${{ matrix.config }}
+          ${{github.workspace}}/install/lib/${{ matrix.config }}
         retention-days: 7
