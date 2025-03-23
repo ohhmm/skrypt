@@ -68,12 +68,7 @@ jobs:
         vcpkgJsonGlob: '**/vcpkg.json'
 
     - name: Configure CMake
-      run: |
-        if [ "${{ runner.os }}" == "Windows" ]; then
-          cmake -B ${{github.workspace}}/build -G "Ninja Multi-Config" -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake ${{ env.VCPKG_TARGET_TRIPLET_CMAKE_PARAM }} -DOPENMIND_BUILD_TESTS=ON -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/install -DCMAKE_CXX_STANDARD_LIBRARIES="pathcch.lib"
-        else
-          cmake -B ${{github.workspace}}/build -G "Ninja Multi-Config" -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake ${{ env.VCPKG_TARGET_TRIPLET_CMAKE_PARAM }} -DOPENMIND_BUILD_TESTS=ON -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/install
-        fi
+      run: cmake -B ${{github.workspace}}/build -G "Ninja Multi-Config" -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake ${{ env.VCPKG_TARGET_TRIPLET_CMAKE_PARAM }} -DOPENMIND_BUILD_TESTS=ON -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/install
 
     - name: Build
       run: cmake --build ${{github.workspace}}/build --config ${{ matrix.config }}
