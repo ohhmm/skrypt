@@ -1,0 +1,5 @@
+/home/ubuntu/repos/skrypt/standalone/build/CMakeFiles/skrypt_standalone.dir
+/home/ubuntu/repos/skrypt/standalone/build/CMakeFiles/state_loading_test.dir
+/home/ubuntu/repos/skrypt/standalone/build/CMakeFiles/test.dir
+/home/ubuntu/repos/skrypt/standalone/build/CMakeFiles/edit_cache.dir
+/home/ubuntu/repos/skrypt/standalone/build/CMakeFiles/rebuild_cache.dir
