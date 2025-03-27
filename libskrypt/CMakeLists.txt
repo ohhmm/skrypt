@@ -1,12 +1,11 @@
 
 set(deplist math)
 
-if(TARGET Boost::dll)
-	set(deplist ${deplist} Boost::dll)
-elseif(Boost_DLL_LIBRARY)
-	set(deplist ${deplist} ${Boost_DLL_LIBRARY})
-else()
-	set(deplist ${deplist} boost)
-endif()
+# Define common source files
+set(COMMON_SOURCES
+    skrypt.cpp
+    state_loading.cpp
+)
 
-lib(${deplist})
+# Build the library without Python bindings
+lib(${deplist} SOURCES ${COMMON_SOURCES})
