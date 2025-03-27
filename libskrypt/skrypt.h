@@ -65,10 +65,13 @@ public:
 
     bool Add(::omnn::math::Valuable&&);
     bool Add(std::string_view);
+    bool Add(const ::omnn::math::Variable& var, ::omnn::math::Valuable&& val);
     bool ParseNextLine(std::istream&, std::string_view&);
     void PrintVarKnowns(const omnn::math::Variable&);
     void PrintAllKnowns();
     void ProcessQuestionLine(std::string_view&);
+    bool ProcessFunctionDefinition(std::string_view&);
+    bool ProcessFunctionApplication(std::string_view&);
 
     void BindTargetStream(std::ostream&);
     void BindTargetStream(std::shared_ptr<std::ostream>);

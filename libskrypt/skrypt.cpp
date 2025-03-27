@@ -159,6 +159,10 @@ bool Skrypt::Add(std::string_view line) {
     return Add(v);
 }
 
+bool Skrypt::Add(const ::omnn::math::Variable& var, ::omnn::math::Valuable&& val) {
+    return base::Add(var, std::move(val));
+}
+
 namespace {
 	std::string Questionless(std::string s) {
 		s.erase(std::remove(s.begin(), s.end(), '?'), s.end());
@@ -170,6 +174,132 @@ namespace {
 	auto FindBracePos(std::string_view line) {
 		return line.find_first_of("{}[]"sv);
 	}
+    
+    bool IsFunctionDefinition(std::string_view line) {
+        auto openParenPos = line.find('(');
+        if (openParenPos == std::string_view::npos) return false;
+        
+        auto closeParenPos = line.find(')', openParenPos);
+        if (closeParenPos == std::string_view::npos) return false;
+        
+        auto equalPos = line.find('=', closeParenPos);
+        if (equalPos == std::string_view::npos) return false;
+        
+        if (openParenPos == 0) return false;
+        
+        return true;
+    }
+    
+    bool IsFunctionApplication(std::string_view line) {
+        auto equalPos = line.find('=');
+        auto openParenPos = line.find('(');
+        
+        if (openParenPos == std::string_view::npos) return false;
+        
+        if (equalPos != std::string_view::npos && openParenPos < equalPos) return false;
+        
+        auto closeParenPos = line.find(')', openParenPos);
+        if (closeParenPos == std::string_view::npos) return false;
+        
+        if (openParenPos == 0) return false;
+        
+        return true;
+    }
+    
+    std::vector<std::string> ParseFunctionArgs(std::string_view argsStr) {
+        std::vector<std::string> args;
+        std::string currentArg;
+        
+        for (size_t i = 0; i < argsStr.size(); ++i) {
+            char c = argsStr[i];
+            if (c == ',') {
+                boost::algorithm::trim(currentArg);
+                if (!currentArg.empty()) {
+                    args.push_back(currentArg);
+                    currentArg.clear();
+                }
+            } else {
+                currentArg += c;
+            }
+        }
+        
+        boost::algorithm::trim(currentArg);
+        if (!currentArg.empty()) {
+            args.push_back(currentArg);
+        }
+        
+        return args;
+    }
+}
+
+bool Skrypt::ProcessFunctionDefinition(std::string_view& line)
+{
+    if (!IsFunctionDefinition(line)) {
+        return false;
+    }
+    
+    auto openParenPos = line.find('(');
+    auto closeParenPos = line.find(')', openParenPos);
+    auto equalPos = line.find('=', closeParenPos);
+    
+    std::string_view funcName = line.substr(0, openParenPos);
+    boost::algorithm::trim(funcName);
+    
+    std::string_view argsStr = line.substr(openParenPos + 1, closeParenPos - openParenPos - 1);
+    auto args = ParseFunctionArgs(argsStr);
+    
+    std::string_view exprStr = line.substr(equalPos + 1);
+    boost::algorithm::trim(exprStr);
+    
+    std::string lambdaExpr = std::string(exprStr);
+    
+    auto& funcVar = varHost->Host(std::string(funcName));
+    
+    std::string functionDef = "Function(";
+    functionDef += std::string(funcName);
+    functionDef += ", [";
+    for (size_t i = 0; i < args.size(); ++i) {
+        if (i > 0) functionDef += ", ";
+        functionDef += args[i];
+    }
+    functionDef += "], ";
+    functionDef += std::string(exprStr);
+    functionDef += ")";
+    
+    Add(funcVar, ::omnn::math::Valuable(functionDef, varHost));
+    
+    return true;
+}
+
+bool Skrypt::ProcessFunctionApplication(std::string_view& line)
+{
+    if (!IsFunctionApplication(line)) {
+        return false;
+    }
+    
+    auto equalPos = line.find('=');
+    std::string_view leftSide;
+    std::string_view rightSide;
+    
+    if (equalPos != std::string_view::npos) {
+        leftSide = line.substr(0, equalPos);
+        boost::algorithm::trim(leftSide);
+        rightSide = line.substr(equalPos + 1);
+    } else {
+        rightSide = line;
+    }
+    
+    boost::algorithm::trim(rightSide);
+    
+    if (equalPos != std::string_view::npos) {
+        auto& resultVar = varHost->Host(std::string(leftSide));
+        
+        Add(resultVar, ::omnn::math::Valuable(rightSide, varHost));
+    } else {
+        Add(::omnn::math::Valuable(rightSide, varHost));
+    }
+    
+    return true;
 }
 
 void Skrypt::ProcessQuestionLine(std::string_view& line)
@@ -332,6 +462,8 @@ bool Skrypt::ParseNextLine(std::istream& in, std::string_view& line)
 
         if (boost::algorithm::contains(line, "?")) {
             ProcessQuestionLine(line);
+        } else if (ProcessFunctionDefinition(line)) {
+        } else if (ProcessFunctionApplication(line)) {
         } else {
             Valuable expression;
             try {
