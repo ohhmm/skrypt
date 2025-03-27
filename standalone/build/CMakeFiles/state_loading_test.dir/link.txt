@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/state_loading_test.dir/tests/state_loading_test.cpp.o -o state_loading_test  libskrypt_standalone.a 

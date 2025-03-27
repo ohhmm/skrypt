@@ -9,12 +9,13 @@ option(OPENMIND_DEBUG_CHECKS "Additional debug checks" OFF)
 find_package(OpenCL)
 option(OPENMIND_USE_OPENCL "OpenCL GPU calculations" ${OpenCL_FOUND})
 option(OPENMIND_MATH_USE_LEVELDB_CACHE "DB cache solutions" ON)
-set(BOOST_ADDITIONAL_COMPONENTS ${BOOST_ADDITIONAL_COMPONENTS} dll;program_options)
+option(OPENMIND_BUILD_PYTHON_BINDINGS "Build Python bindings" OFF)
+set(BOOST_ADDITIONAL_COMPONENTS ${BOOST_ADDITIONAL_COMPONENTS} program_options)
 list(REMOVE_DUPLICATES BOOST_ADDITIONAL_COMPONENTS)
-set(BOOST_ADDITIONAL_COMPONENTS ${BOOST_ADDITIONAL_COMPONENTS} CACHE VERSION "Boost components" FORCE)
+set(BOOST_ADDITIONAL_COMPONENTS ${BOOST_ADDITIONAL_COMPONENTS} CACHE STRING "Boost components" FORCE)
 # Tell OpenMind to use any boost version installed in the system if any
 if(Boost_FOUND)
-    set(OPENMIND_REQUIRED_BOOST_VERSION ${Boost_VERSION_STRING} CACHE VERSION "Boost library version to use" FORCE)
+    set(OPENMIND_REQUIRED_BOOST_VERSION ${Boost_VERSION_STRING} CACHE STRING "Boost library version to use" FORCE)
 endif()
 
 # Find some Git

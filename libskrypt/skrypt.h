@@ -87,6 +87,41 @@ public:
     const omnn::math::Valuable::va_names_t& Load(const boost::filesystem::path&);
 
     /// <summary>
+    /// Loads Freesweeper state and represents it in the knowledge matrix
+    /// </summary>
+    /// <param name="state_text">Text representation of the Freesweeper state</param>
+    /// <returns>Variable names in the loaded state</returns>
+    const omnn::math::Valuable::va_names_t& LoadFreesweeperState(const std::string& state_text);
+
+    /// <summary>
+    /// Loads Sudoku state and represents it in the knowledge matrix
+    /// </summary>
+    /// <param name="state_text">Text representation of the Sudoku puzzle</param>
+    /// <returns>Variable names in the loaded state</returns>
+    const omnn::math::Valuable::va_names_t& LoadSudokuState(const std::string& state_text);
+
+    /// <summary>
+    /// Loads C++ code and represents it in the knowledge matrix for analysis
+    /// </summary>
+    /// <param name="code">C++ code to analyze</param>
+    /// <returns>Variable names in the loaded state</returns>
+    const omnn::math::Valuable::va_names_t& LoadCppCode(const std::string& code);
+
+    /// <summary>
+    /// Loads callstack data and represents it in the knowledge matrix for analysis
+    /// </summary>
+    /// <param name="callstack">Text representation of the callstack</param>
+    /// <returns>Variable names in the loaded state</returns>
+    const omnn::math::Valuable::va_names_t& LoadCallstack(const std::string& callstack);
+
+    /// <summary>
+    /// Loads coredump data and represents it in the knowledge matrix for analysis
+    /// </summary>
+    /// <param name="coredump_path">Path to the coredump file</param>
+    /// <returns>Variable names in the loaded state</returns>
+    const omnn::math::Valuable::va_names_t& LoadCoredump(const std::string& coredump_path);
+
+    /// <summary>
     /// Loads or gets loaded .skrypt file and returns Skrypt object reference
     /// </summary>
     /// <returns>Skrypt&</returns>

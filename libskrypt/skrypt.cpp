@@ -677,3 +677,410 @@ Skrypt::Skrypt(const skrypt::Skrypt& that)
     , moduleFileSearchAdditionalPaths(that.moduleFileSearchAdditionalPaths)
 {
 }
+
+const Valuable::va_names_t& Skrypt::LoadFreesweeperState(const std::string& state_text, 
+    std::shared_ptr<class HierarchicalKnowledgeMatrix> matrix)
+{
+    // Create a matrix if none was provided
+    if (!matrix) {
+        // Parse the state_text to determine dimensions
+        size_t rows = 0, cols = 0;
+        std::istringstream iss(state_text);
+        std::string line;
+        while (std::getline(iss, line)) {
+            rows++;
+            if (cols == 0) {
+                cols = line.length();
+            }
+        }
+        
+        matrix = std::make_shared<HierarchicalKnowledgeMatrix>(rows, cols, 0.5);
+    }
+    
+    // Parse the Freesweeper state and populate the matrix
+    std::istringstream iss(state_text);
+    std::string line;
+    size_t row = 0;
+    
+    while (std::getline(iss, line) && row < matrix->GetDimensions().first) {
+        for (size_t col = 0; col < line.length() && col < matrix->GetDimensions().second; col++) {
+            char cell = line[col];
+            
+            if (cell >= '1' && cell <= '8') {
+                // Number cells indicate adjacent mines
+                int adjacent_mines = cell - '0';
+                
+                // Create variables for this cell
+                std::string var_name = "cell_" + std::to_string(row) + "_" + std::to_string(col);
+                auto& var = varHost->Host(var_name);
+                vars[var_name] = var;
+                
+                // Update matrix with adjacent mine count
+                matrix->SetValue(row, col, 0.0); // Not a mine
+                
+                // Create a deeper matrix for adjacent mines info
+                auto deeper = matrix->AddDeeperMatrix(row, col);
+                deeper->SetValue(0, 0, adjacent_mines / 8.0); // Store adjacent count as probability
+            } else if (cell == '*') {
+                // Mine cell
+                std::string var_name = "cell_" + std::to_string(row) + "_" + std::to_string(col);
+                auto& var = varHost->Host(var_name);
+                vars[var_name] = var;
+                
+                matrix->SetValue(row, col, 1.0); // 100% chance of mine
+            } else if (cell == '.') {
+                // Unknown cell
+                std::string var_name = "cell_" + std::to_string(row) + "_" + std::to_string(col);
+                auto& var = varHost->Host(var_name);
+                vars[var_name] = var;
+                
+                // Default probability (0.5) remains
+            } else if (cell == ' ' || cell == '0') {
+                // Empty cell
+                std::string var_name = "cell_" + std::to_string(row) + "_" + std::to_string(col);
+                auto& var = varHost->Host(var_name);
+                vars[var_name] = var;
+                
+                matrix->SetValue(row, col, 0.0); // 0% chance of mine
+            }
+        }
+        row++;
+    }
+    
+    // Add the matrix to the system
+    Add(Valuable("freesweeper_state_loaded = 1"));
+    
+    return vars;
+}
+
+const Valuable::va_names_t& Skrypt::LoadSudokuState(const std::string& state_text,
+    std::shared_ptr<class HierarchicalKnowledgeMatrix> matrix)
+{
+    // Create a matrix if none was provided
+    if (!matrix) {
+        // Sudoku is typically 9x9
+        matrix = std::make_shared<HierarchicalKnowledgeMatrix>(9, 9, 0.0);
+    }
+    
+    // Parse the Sudoku state and populate the matrix
+    std::istringstream iss(state_text);
+    std::string line;
+    size_t row = 0;
+    
+    while (std::getline(iss, line) && row < matrix->GetDimensions().first) {
+        // Skip empty lines
+        if (line.empty()) {
+            continue;
+        }
+        
+        size_t col = 0;
+        for (char cell : line) {
+            if (col >= matrix->GetDimensions().second) {
+                break;
+            }
+            
+            // Skip non-digit and non-dot characters
+            if (!isdigit(cell) && cell != '.') {
+                continue;
+            }
+            
+            // Create variable for this cell
+            std::string var_name = "sudoku_" + std::to_string(row) + "_" + std::to_string(col);
+            auto& var = varHost->Host(var_name);
+            vars[var_name] = var;
+            
+            if (cell == '.') {
+                // Empty cell - add a deeper matrix with probabilities for each possible value
+                auto deeper = matrix->AddDeeperMatrix(row, col);
+                
+                // Initially, all values 1-9 are equally possible
+                for (int val = 1; val <= 9; val++) {
+                    deeper->SetValue(0, val, 1.0/9.0);
+                }
+            } else if (isdigit(cell) && cell != '0') {
+                // Known value
+                int value = cell - '0';
+                
+                // Set the value in the matrix
+                matrix->SetValue(row, col, value);
+                
+                // Add the known value to the system
+                Add(var, Valuable(value));
+            }
+            
+            col++;
+        }
+        row++;
+    }
+    
+    // Add the matrix to the system
+    Add(Valuable("sudoku_state_loaded = 1"));
+    
+    return vars;
+}
+
+const Valuable::va_names_t& Skrypt::LoadCppCode(const std::string& code,
+    std::shared_ptr<class HierarchicalKnowledgeMatrix> matrix)
+{
+    // Create a matrix if none was provided
+    // For C++ code, we'll use a matrix where:
+    // - Rows represent lines of code
+    // - Columns represent different properties (e.g., complexity, nesting level, etc.)
+    if (!matrix) {
+        // Count lines in the code
+        size_t line_count = 1; // Start with 1 for the last line without newline
+        for (char c : code) {
+            if (c == '\n') {
+                line_count++;
+            }
+        }
+        
+        // Use 10 columns for different code properties
+        matrix = std::make_shared<HierarchicalKnowledgeMatrix>(line_count, 10, 0.0);
+    }
+    
+    // Parse the C++ code and populate the matrix
+    std::istringstream iss(code);
+    std::string line;
+    size_t row = 0;
+    size_t nesting_level = 0;
+    
+    while (std::getline(iss, line) && row < matrix->GetDimensions().first) {
+        // Create variable for this line
+        std::string var_name = "cpp_line_" + std::to_string(row);
+        auto& var = varHost->Host(var_name);
+        vars[var_name] = var;
+        
+        // Track nesting level
+        for (char c : line) {
+            if (c == '{') nesting_level++;
+            if (c == '}') nesting_level = (nesting_level > 0) ? nesting_level - 1 : 0;
+        }
+        
+        // Column 0: Line length (normalized to 0-1 range, assuming max length of 200)
+        double line_length = std::min(1.0, line.length() / 200.0);
+        matrix->SetValue(row, 0, line_length);
+        
+        // Column 1: Nesting level (normalized to 0-1 range, assuming max nesting of 10)
+        double norm_nesting = std::min(1.0, nesting_level / 10.0);
+        matrix->SetValue(row, 1, norm_nesting);
+        
+        // Column 2: Contains function call (simple heuristic)
+        bool has_function_call = line.find('(') != std::string::npos && 
+                                line.find(')') != std::string::npos;
+        matrix->SetValue(row, 2, has_function_call ? 1.0 : 0.0);
+        
+        // Column 3: Contains conditional
+        bool has_conditional = line.find("if") != std::string::npos || 
+                              line.find("else") != std::string::npos ||
+                              line.find("switch") != std::string::npos;
+        matrix->SetValue(row, 3, has_conditional ? 1.0 : 0.0);
+        
+        // Column 4: Contains loop
+        bool has_loop = line.find("for") != std::string::npos || 
+                       line.find("while") != std::string::npos ||
+                       line.find("do") != std::string::npos;
+        matrix->SetValue(row, 4, has_loop ? 1.0 : 0.0);
+        
+        // Add deeper matrix for more detailed analysis
+        auto deeper = matrix->AddDeeperMatrix(row, 5);
+        
+        // Store the actual line text as a series of character codes
+        for (size_t i = 0; i < line.length() && i < 100; i++) {
+            // Normalize ASCII value to 0-1 range
+            double char_val = static_cast<double>(line[i]) / 255.0;
+            deeper->SetValue(0, i, char_val);
+        }
+        
+        row++;
+    }
+    
+    // Add the matrix to the system
+    Add(Valuable("cpp_code_loaded = 1"));
+    
+    return vars;
+}
+
+const Valuable::va_names_t& Skrypt::LoadCallstack(const std::string& callstack,
+    std::shared_ptr<class HierarchicalKnowledgeMatrix> matrix)
+{
+    // Create a matrix if none was provided
+    // For callstack, we'll use a matrix where:
+    // - Rows represent stack frames
+    // - Columns represent different properties of each frame
+    if (!matrix) {
+        // Count lines in the callstack to estimate number of frames
+        size_t frame_count = 1; // Start with 1 for the last line without newline
+        for (char c : callstack) {
+            if (c == '\n') {
+                frame_count++;
+            }
+        }
+        
+        // Use 5 columns for different frame properties
+        matrix = std::make_shared<HierarchicalKnowledgeMatrix>(frame_count, 5, 0.0);
+    }
+    
+    // Parse the callstack and populate the matrix
+    std::istringstream iss(callstack);
+    std::string line;
+    size_t row = 0;
+    
+    while (std::getline(iss, line) && row < matrix->GetDimensions().first) {
+        // Skip empty lines
+        if (line.empty()) {
+            continue;
+        }
+        
+        // Create variable for this frame
+        std::string var_name = "frame_" + std::to_string(row);
+        auto& var = varHost->Host(var_name);
+        vars[var_name] = var;
+        
+        // Column 0: Frame has function name
+        bool has_function = line.find('(') != std::string::npos;
+        matrix->SetValue(row, 0, has_function ? 1.0 : 0.0);
+        
+        // Column 1: Frame has line number
+        bool has_line_number = false;
+        for (size_t i = 0; i < line.length(); i++) {
+            if (isdigit(line[i]) && i > 0 && line[i-1] == ':') {
+                has_line_number = true;
+                break;
+            }
+        }
+        matrix->SetValue(row, 1, has_line_number ? 1.0 : 0.0);
+        
+        // Column 2: Frame is from system library (simple heuristic)
+        bool is_system_lib = line.find("/lib/") != std::string::npos || 
+                            line.find("/usr/lib/") != std::string::npos;
+        matrix->SetValue(row, 2, is_system_lib ? 1.0 : 0.0);
+        
+        // Add deeper matrix for more detailed analysis
+        auto deeper = matrix->AddDeeperMatrix(row, 3);
+        
+        // Extract function name if available
+        size_t func_start = line.find_last_of('/');
+        if (func_start == std::string::npos) {
+            func_start = 0;
+        } else {
+            func_start++;
+        }
+        
+        size_t func_end = line.find('(', func_start);
+        if (func_end == std::string::npos) {
+            func_end = line.length();
+        }
+        
+        std::string func_name = line.substr(func_start, func_end - func_start);
+        
+        // Store function name characters
+        for (size_t i = 0; i < func_name.length() && i < 50; i++) {
+            // Normalize ASCII value to 0-1 range
+            double char_val = static_cast<double>(func_name[i]) / 255.0;
+            deeper->SetValue(0, i, char_val);
+        }
+        
+        row++;
+    }
+    
+    // Add the matrix to the system
+    Add(Valuable("callstack_loaded = 1"));
+    
+    return vars;
+}
+
+const Valuable::va_names_t& Skrypt::LoadCoredump(const boost::filesystem::path& coredump_path,
+    std::shared_ptr<class HierarchicalKnowledgeMatrix> matrix)
+{
+    // Create a matrix if none was provided
+    // For coredump, we'll use a matrix where:
+    // - Rows represent different sections of the coredump
+    // - Columns represent different properties of each section
+    if (!matrix) {
+        // Use a fixed size for coredump analysis
+        // 20 sections with 10 properties each
+        matrix = std::make_shared<HierarchicalKnowledgeMatrix>(20, 10, 0.0);
+    }
+    
+    // Check if the coredump file exists
+    if (!boost::filesystem::exists(coredump_path)) {
+        std::cerr << "Coredump file not found: " << coredump_path << std::endl;
+        
+        // Add error indicator to the system
+        Add(Valuable("coredump_load_error = 1"));
+        
+        return vars;
+    }
+    
+    // Use boost::iostreams to read the beginning of the coredump file
+    // This is a simplified approach - real coredump analysis would require more sophisticated parsing
+    boost::iostreams::mapped_file_source file;
+    try {
+        file.open(coredump_path);
+    } catch (const std::exception& e) {
+        std::cerr << "Error opening coredump file: " << e.what() << std::endl;
+        
+        // Add error indicator to the system
+        Add(Valuable("coredump_load_error = 1"));
+        
+        return vars;
+    }
+    
+    // Create variables for coredump metadata
+    auto& var_path = varHost->Host("coredump_path");
+    vars["coredump_path"] = var_path;
+    Add(var_path, Valuable(coredump_path.string()));
+    
+    auto& var_size = varHost->Host("coredump_size");
+    vars["coredump_size"] = var_size;
+    Add(var_size, Valuable(file.size()));
+    
+    // Analyze the first few bytes to determine if it's a valid ELF file (simplified)
+    if (file.size() >= 4 && file.data()[0] == 0x7F && file.data()[1] == 'E' && 
+        file.data()[2] == 'L' && file.data()[3] == 'F') {
+        
+        // It's an ELF file, likely a valid coredump
+        auto& var_valid = varHost->Host("coredump_valid");
+        vars["coredump_valid"] = var_valid;
+        Add(var_valid, Valuable(1));
+        
+        // Set basic properties in the matrix
+        matrix->SetValue(0, 0, 1.0); // Valid ELF file
+        
+        // Determine ELF class (32 or 64 bit)
+        if (file.size() >= 5) {
+            bool is_64bit = (file.data()[4] == 2);
+            matrix->SetValue(0, 1, is_64bit ? 1.0 : 0.0);
+            
+            auto& var_64bit = varHost->Host("coredump_64bit");
+            vars["coredump_64bit"] = var_64bit;
+            Add(var_64bit, Valuable(is_64bit ? 1 : 0));
+        }
+        
+        // Create a deeper matrix for the first section to store the ELF header bytes
+        auto deeper = matrix->AddDeeperMatrix(0, 2);
+        
+        // Store the first 64 bytes of the file
+        for (size_t i = 0; i < 64 && i < file.size(); i++) {
+            // Normalize byte value to 0-1 range
+            double byte_val = static_cast<double>(static_cast<unsigned char>(file.data()[i])) / 255.0;
+            deeper->SetValue(0, i, byte_val);
+        }
+    } else {
+        // Not a valid ELF file
+        auto& var_valid = varHost->Host("coredump_valid");
+        vars["coredump_valid"] = var_valid;
+        Add(var_valid, Valuable(0));
+        
+        matrix->SetValue(0, 0, 0.0); // Not a valid ELF file
+    }
+    
+    // Close the file
+    file.close();
+    
+    // Add the matrix to the system
+    Add(Valuable("coredump_loaded = 1"));
+    
+    return vars;
+}

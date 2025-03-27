@@ -1,0 +1,2 @@
+/usr/bin/ar qc libskrypt_standalone.a CMakeFiles/skrypt_standalone.dir/src/state_loading.cpp.o
+/usr/bin/ranlib libskrypt_standalone.a
