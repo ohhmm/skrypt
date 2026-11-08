@@ -393,32 +393,63 @@ Skrypt::Skrypt(std::istream & stream)
 
 boost::filesystem::path Skrypt::FindModulePath(std::string_view name) const {
     auto path = sourceFilePath.parent_path() / name;
-    if (!path.has_extension())
-        path.replace_extension(".skrypt");
+    if (!path.has_extension()) {
+
+        if (boost::filesystem::exists(path.string() + ".mzn"))
+
+            path.replace_extension(".mzn");
+
+        else
+
+            path.replace_extension(".skrypt");
+
+    }
     if (!boost::filesystem::exists(path)) {
         path = path.filename();
     }
     auto base = boost::dll::program_location();
     if (!boost::filesystem::exists(path)) {
         path = base.parent_path() / name;
-        if (!path.has_extension())
-            path.replace_extension(".skrypt");
+        if (!path.has_extension()) {
+            if (boost::filesystem::exists(path.string() + ".mzn"))
+                path.replace_extension(".mzn");
+            else
+                path.replace_extension(".skrypt");
+        }
     }
 
     if (!boost::filesystem::exists(path)) {
         auto loc = boost::dll::this_line_location();
         if (loc != base) {
             path = loc.parent_path() / name;
-            if (!path.has_extension())
-                path.replace_extension(".skrypt");
+            if (!path.has_extension()) {
+
+                if (boost::filesystem::exists(path.string() + ".mzn"))
+
+                    path.replace_extension(".mzn");
+
+                else
+
+                    path.replace_extension(".skrypt");
+
+            }
         }
     }
 
     if (!boost::filesystem::exists(path)) {
         for (auto& searchPath : moduleFileSearchAdditionalPaths) {
 			path = searchPath / name;
-			if (!path.has_extension())
-				path.replace_extension(".skrypt");
+			if (!path.has_extension()) {
+
+			    if (boost::filesystem::exists(path.string() + ".mzn"))
+
+			        path.replace_extension(".mzn");
+
+			    else
+
+			        path.replace_extension(".skrypt");
+
+			}
             if (boost::filesystem::exists(path)) {
 				break;
 			}
